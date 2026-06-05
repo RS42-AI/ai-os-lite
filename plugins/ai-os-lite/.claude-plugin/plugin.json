@@ -1,0 +1,27 @@
+{
+  "name": "ai-os-lite",
+  "version": "0.3.4",
+  "description": "AI-OS Lite — an AI Personal Operating System for unified daily journaling, vault management, briefings, and task orchestration on Obsidian + Linear",
+  "author": {
+    "name": "RandomStateLabs",
+    "url": "https://github.com/RandomStateLabs"
+  },
+  "license": "AGPL-3.0-only",
+  "keywords": [
+    "ai-os",
+    "obsidian",
+    "journaling",
+    "productivity",
+    "briefings",
+    "linear"
+  ],
+  "skills": [
+    "./skills/vault-config",
+    "./skills/process-journal",
+    "./skills/start-day",
+    "./skills/prep-evening",
+    "./skills/process-evening",
+    "./skills/project-sync",
+    "./skills/vault-commit"
+  ]
+}

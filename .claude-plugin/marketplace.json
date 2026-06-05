@@ -1,0 +1,30 @@
+{
+  "name": "ai-os-lite-marketplace",
+  "metadata": {
+    "description": "AI-OS Lite — unified daily journaling, vault management, briefings, and task orchestration for Obsidian + Linear",
+    "version": "0.3.4"
+  },
+  "owner": {
+    "name": "RS42-AI",
+    "url": "https://github.com/RS42-AI"
+  },
+  "plugins": [
+    {
+      "name": "ai-os-lite",
+      "source": "./plugins/ai-os-lite",
+      "description": "AI-OS Lite — an AI Personal Operating System plugin providing morning prep, evening reflection, journal processing, vault commits, and project sync. Orchestrates daily workflows across Obsidian, Linear, and Todoist.",
+      "category": "productivity",
+      "tags": [
+        "ai-os",
+        "obsidian",
+        "journaling",
+        "productivity",
+        "briefings",
+        "linear",
+        "todoist",
+        "daily-workflow",
+        "vault-management"
+      ]
+    }
+  ]
+}
