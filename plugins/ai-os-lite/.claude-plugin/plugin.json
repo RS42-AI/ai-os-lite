@@ -22,6 +22,7 @@
     "./skills/prep-evening",
     "./skills/process-evening",
     "./skills/project-sync",
-    "./skills/vault-commit"
+    "./skills/vault-commit",
+    "./skills/vault-audit"
   ]
 }
