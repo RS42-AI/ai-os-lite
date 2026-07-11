@@ -8,7 +8,7 @@ AI-OS Lite reads and writes your vault, syncs work items to [Todoist](https://to
 
 ## What it does
 
-Seven skills, invoked by natural language or slash commands:
+Eight skills, invoked by natural language or slash commands:
 
 | Skill | What it does |
 |-------|-------------|
@@ -18,6 +18,7 @@ Seven skills, invoked by natural language or slash commands:
 | `process-evening` | Processes an evening entry — mood, habits, gratitude, tomorrow's tasks, pattern detection |
 | `project-sync` | Refreshes a project hub's status from recent devlogs, notes, and Linear |
 | `vault-commit` | Groups uncommitted vault changes into clean semantic git commits |
+| `vault-audit` | Deterministic conformance audit of your vault's structure against its own `AGENTS.md` contract |
 | `vault-config` | Shared operational config — tool patterns, integrations, search strategy (not user-invoked) |
 
 ## Requirements
