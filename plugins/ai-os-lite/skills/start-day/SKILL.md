@@ -50,6 +50,7 @@ Track all source calls per `vault-config/references/source-manifest.md`. The gat
 | GWS Calendar | Today's calendar events | MEDIUM |
 | Linear MCP | RS42 issues → Todoist sync | MEDIUM |
 | Task Notes | Task note frontmatter (all projects) | MEDIUM |
+| Vault git | Scaffold snapshot commit (Step 5b) | MEDIUM |
 
 ## Invocation
 
@@ -498,6 +499,21 @@ td task add "Verb-first description (Linear RS4-xxx)" --project "{SideArea2}" --
 **Naming**: Use the Linear title if verb-first and specific. Rewrite vague titles.
 **Completion**: Todoist leads, external systems follow. If Linear shows Done but the Todoist mirror is open, flag it: `*(Linear RS4-xxx, resolved upstream — close?)*`
 
+## Step 5b: Commit the Daily Scaffold
+
+Snapshot the day's starting state in the vault git repo so the morning-entry recording that follows shows up as a distinct modification in git history (`/vault-commit`'s nightly pass would otherwise fold scaffold and morning entry into one commit):
+
+```bash
+bash ${CLAUDE_PLUGIN_ROOT}/skills/start-day/scripts/commit_daily_scaffold.sh TARGET_DATE
+```
+
+The script commits **only** the daily hub (`1. Daily/TARGET_DATE.md`) and the morning journal entry (`5. Resources/Personal/Journal/Morning Entries/TARGET_DATE.md`) with the message `chore: start-day scaffold for TARGET_DATE`. Everything else dirty in the vault (private stamps, orphan-cluster devlogs from 4g, unrelated edits) is left for `/vault-commit`.
+
+Parse the JSON output:
+- `{committed: true, sha, ...}` — report the commit in Step 6's execution report.
+- `{committed: false, reason: "no_changes"}` — re-run with nothing new; report as skipped, not a failure.
+- `{committed: false, error: "..."}` — the commit failed. **Warn, don't abort**: continue to Step 6 and surface the error in the Warnings section. The journal page is already prepped; a missed snapshot must not block the morning meeting.
+
 ## Step 6: Report Results
 
 Merge the gather script's `source_manifest` with MCP tool results into a unified execution report (per `vault-config/references/source-manifest.md`):
@@ -520,6 +536,7 @@ Ready to record your morning journal.
 - [x] Linear in-progress — N items
 - [x] QMD Search — backup search, N results
 - [x] Evening reflection — found
+- [x] Scaffold commit — abc1234 `chore: start-day scaffold for YYYY-MM-DD`
 
 #### Warnings
 - GWS integration unavailable. Run `gws auth login` to refresh.
@@ -546,6 +563,9 @@ Only include Warnings and Fix sections if there are actual issues. Script-tracke
 | No Todoist tasks | "No overdue tasks" |
 | Linear unavailable | Continue — note in source manifest |
 | Journal already has context | Replace existing context (re-run safe) |
+| Re-run with no scaffold changes since last commit | Step 5b skips with `reason: no_changes` — no duplicate commit |
+| Re-run that changed the rendered context | Step 5b commits a fresh snapshot (same message) — legitimate, not a duplicate |
+| Scaffold commit fails (merge in progress, locked index) | Warn in execution report, do not abort — journal page is already prepped |
 
 ## What This Skill Does NOT Do
 
@@ -555,3 +575,4 @@ Only include Warnings and Fix sections if there are actual issues. Script-tracke
 - Complete Linear items (reads state, mirrors to Todoist)
 - Does not write task lists to the journal or daily hub (Bases queries in the template render tasks from `type: task` frontmatter)
 - Does not create task notes (that's `/process-journal`)
+- Does not commit anything beyond the day's scaffold (hub + morning journal) — `/vault-commit` owns all other commits

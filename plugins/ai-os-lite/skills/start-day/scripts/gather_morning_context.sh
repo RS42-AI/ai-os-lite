@@ -19,7 +19,12 @@ set -o pipefail
 # Per-run cache directory (cleaned up at exit). Holds project-hub privacy lookups
 # and hub-path resolutions so a single window doesn't re-read the same hub once
 # per file. Keyed by sanitized slug.
-CACHE_DIR=$(mktemp -d -t pos-gather.XXXXXX)
+#
+# Create it explicitly inside $TMPDIR. Do NOT use `mktemp -t`: on macOS that
+# resolves to confstr(_CS_DARWIN_USER_TEMP_DIR) (/var/folders/.../T), which the
+# Claude Code Bash sandbox blocks ("Operation not permitted") in headless
+# scheduled runs. $TMPDIR is the harness-provided sandbox-writable dir.
+CACHE_DIR=$(mktemp -d "${TMPDIR:-/tmp}/pos-gather.XXXXXX")
 trap 'rm -rf "$CACHE_DIR"' EXIT
 
 cache_get() {
@@ -308,8 +313,10 @@ stamp_private_if_needed() {
   fi
 
   # Fallback: insert `private: true` before the closing --- of the frontmatter.
+  # Use $CACHE_DIR (under $TMPDIR) — a bare `mktemp` also hits the sandbox-blocked
+  # /var/folders temp on macOS.
   local tmp
-  tmp=$(mktemp)
+  tmp=$(mktemp "$CACHE_DIR/fm.XXXXXX")
   awk 'BEGIN{seen=0; closed=0} \
        /^---$/ { \
          if (seen==0) { seen=1; print; next } \
