@@ -20,6 +20,9 @@ allowed-tools:
   # Todoist CLI (task creation and dedup)
   - Bash(td task:*)
   - Bash(td comment:*)
+  # Process-journal scripts (data collection + git commit)
+  - Bash(bash ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/*.sh:*)
+  - Bash(chmod:*)
 ---
 
 # Process Journal
@@ -43,6 +46,7 @@ Track all source calls per `vault-config/references/source-manifest.md`. This sk
 | Obsidian MCP | Patch sections, create task notes | REQUIRED |
 | QMD Search | People lookup in vault contacts | LOW |
 | Todoist CLI | Task creation, dedup check | HIGH |
+| Vault git | Processing output commit (Step 8j) | MEDIUM |
 
 ## Invocation
 
@@ -697,6 +701,29 @@ If Step 4's idempotency check detected an existing bottom marker and the user co
 3. Preserve any `← unblocks <X>` chain annotations from existing bullets unless inference found different chains (then prompt: "Replace existing chain context? [y/N]").
 4. Re-render the entire block; do NOT attempt surgical bullet-level patches.
 
+### Step 8j: Commit the Processing Output
+
+Snapshot the processing run's output in the vault git repo so the morning-recording → processing → nightly-`/vault-commit` chain shows up as three distinct, legible git steps instead of folding processing into `/vault-commit`'s nightly pass:
+
+```bash
+bash ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/commit_journal_processing.sh TARGET_DATE VAULT_PATH [TASK_NOTE_REL...]
+```
+
+`VAULT_PATH` is `${PERSONAL_OS_VAULT:-$HOME/Claude/ObsidianVault}`. Pass the vault-relative paths of every task note created or modified in Step 7c as additional arguments. The script commits:
+
+- `5. Resources/Personal/Journal/Morning Entries/TARGET_DATE.md` (AI Summary written in Step 6, bottom marker appended in Step 7g)
+- `1. Daily/TARGET_DATE.md` (priorities block written in Steps 8a–8g)
+- Any task notes passed as arguments (created in Step 7c)
+
+with the message `docs: process-journal for TARGET_DATE`.
+
+**If the task note list is empty** (user declined all creation in Step 7f, or this is a re-run with no new task notes): omit the task note arguments — the script falls back to the two core paths.
+
+Parse the JSON output:
+- `{committed: true, sha, ...}` — report the commit in Step 9's execution report.
+- `{committed: false, reason: "no_changes"}` — re-run with nothing new to commit; report as skipped, not a failure.
+- `{committed: false, error: "..."}` — the commit failed. **Warn, don't abort**: continue to Step 9 and surface the error in the Warnings section. The journal entry and daily hub are already written; a missed snapshot must not block the morning workflow.
+
 ### Step 9: Report Results
 
 Display a summary followed by the execution report (per `vault-config/references/source-manifest.md`):
@@ -725,6 +752,7 @@ Daily hub updated: [[1. Daily/YYYY-MM-DD]]
 - [x] Obsidian MCP — N sections patched
 - [x] QMD Search — people lookup, N contacts resolved
 - [x] Todoist — N tasks created, M deduped
+- [x] Processing commit — abc1234 `docs: process-journal for YYYY-MM-DD`
 
 #### Warnings
 - [only if there are actual warnings]
@@ -799,6 +827,9 @@ When analyzing the raw transcript:
 | No people mentioned | Omit the "People mentioned" line |
 | Evening section present | Only process `## Morning` section (ignore Evening) |
 | Gratitude already in journal | Do not duplicate — keep existing gratitude section |
+| Re-run with no processing changes since last commit | Step 8j skips with `reason: no_changes` — no duplicate commit |
+| Re-run that refreshed the AI Summary, priorities, or bottom marker | Step 8j commits a fresh snapshot (same message) — legitimate, not a duplicate |
+| Processing commit fails (merge in progress, locked index) | Warn in execution report, do not abort — journal and hub are already written |
 
 ## What This Skill Does NOT Do
 
