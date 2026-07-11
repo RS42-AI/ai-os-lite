@@ -77,43 +77,50 @@ resolve_project() {
   local slug="$1"
   local projects_dir="$VAULT/2. Projects"
 
-  # Search each area directory for a matching project folder
+  # Search each area directory; discover hubs at ANY nesting depth.
   for area_dir in "$projects_dir"/*/; do
     [[ ! -d "$area_dir" ]] && continue
     local area_name
     area_name=$(basename "$area_dir")
 
-    for project_dir in "$area_dir"*/; do
-      [[ ! -d "$project_dir" ]] && continue
-      local project_name
+    # A hub is a file X/X.md whose basename matches its immediate parent folder,
+    # found regardless of depth (some areas nest projects several levels deep,
+    # others keep them flat). The parent==base rule excludes Dev Log/Tasks/Notes
+    # folders and dated devlogs.
+    local hub_file
+    while IFS= read -r hub_file; do
+      [[ -z "$hub_file" ]] && continue
+      local project_dir project_name
+      project_dir="$(dirname "$hub_file")"
       project_name=$(basename "$project_dir")
+      [[ "$(basename "$hub_file" .md)" != "$project_name" ]] && continue
 
       # Generate slug from folder name: lowercase, spaces→hyphens, strip non-alnum
       local generated_slug
       generated_slug=$(echo "$project_name" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g' | sed 's/--*/-/g')
 
       if [[ "$generated_slug" == "$slug" ]]; then
-        # Determine area slug
-        local area_slug
-        area_slug=$(echo "$area_name" | tr '[:upper:]' '[:lower:]')
+        # Determine area slug — strip any numbered prefix ("1. {Area}" → "{Area}")
+        local area_clean area_slug
+        area_clean=$(echo "$area_name" | sed 's/^[0-9]*\. *//')
+        area_slug=$(echo "$area_clean" | tr '[:upper:]' '[:lower:]')
 
-        # Find the hub file (project name.md in the project dir)
-        local hub_file=""
-        if [[ -f "$project_dir/${project_name}.md" ]]; then
-          hub_file="2. Projects/${area_name}/${project_name}/${project_name}.md"
-        fi
-
-        local devlog_dir="2. Projects/${area_name}/${project_name}/Dev Log"
-        local notes_dir="2. Projects/${area_name}/${project_name}/Notes"
-        local tasks_dir="2. Projects/${area_name}/${project_name}/Tasks"
+        # Derive all paths from the hub's OWN directory (vault-relative), so
+        # nested hubs resolve correctly instead of a fixed two-level template.
+        local rel_project_dir hub_rel devlog_dir notes_dir tasks_dir
+        rel_project_dir="${project_dir#$VAULT/}"
+        hub_rel="$rel_project_dir/${project_name}.md"
+        devlog_dir="$rel_project_dir/Dev Log"
+        notes_dir="$rel_project_dir/Notes"
+        tasks_dir="$rel_project_dir/Tasks"
 
         jq -n \
           --arg slug "$slug" \
           --arg area "$area_slug" \
           --arg area_display "$area_name" \
           --arg project_name "$project_name" \
-          --arg hub_path "$hub_file" \
-          --argjson hub_exists "$(if [[ -n "$hub_file" && -f "$VAULT/$hub_file" ]]; then echo true; else echo false; fi)" \
+          --arg hub_path "$hub_rel" \
+          --argjson hub_exists "$(if [[ -f "$VAULT/$hub_rel" ]]; then echo true; else echo false; fi)" \
           --arg devlog_dir "$devlog_dir" \
           --argjson devlog_dir_exists "$(if [[ -d "$VAULT/$devlog_dir" ]]; then echo true; else echo false; fi)" \
           --arg notes_dir "$notes_dir" \
@@ -123,7 +130,7 @@ resolve_project() {
           '{slug: $slug, area: $area, area_display: $area_display, project_name: $project_name, hub_path: $hub_path, hub_exists: $hub_exists, devlog_dir: $devlog_dir, devlog_dir_exists: $devlog_dir_exists, notes_dir: $notes_dir, notes_dir_exists: $notes_dir_exists, tasks_dir: $tasks_dir, tasks_dir_exists: $tasks_dir_exists}'
         return 0
       fi
-    done
+    done < <(find "$area_dir" -type f -name '*.md' 2>/dev/null)
   done
 
   # Not found
