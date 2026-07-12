@@ -121,6 +121,47 @@ get_frontmatter() {
   awk '/^---$/{if(f){exit}f=1;next}f' "$1" 2>/dev/null
 }
 
+# ── Area Table (from AGENTS.md) ──────────────────────────────────────
+# Parses the "| Area folder | `area` slug |" table (matched the same way
+# area_rank() matches it: rows whose folder cell mentions "Areas/" or
+# "Personal/") to emit each area's slug, display name, and rank in table
+# row order. This is the single source of truth for area ordering and
+# area-hub wikilink targets used by the render layer — never hardcode
+# area names/order downstream. Missing/unparseable AGENTS.md degrades to
+# an empty array (renderers fall back to a generic per-slug display).
+gather_areas() {
+  local areas_arr="[]"
+  [[ -f "$VAULT/AGENTS.md" ]] || { echo "$areas_arr"; return; }
+
+  local rank=1
+  while IFS= read -r row; do
+    [[ -z "$row" ]] && continue
+    local folder="${row%%$'\x01'*}"
+    local slug="${row#*$'\x01'}"
+    local display
+    display=$(echo "${folder%/}" | awk -F'/' '{print $NF}' | sed -E 's/^[0-9]+\.[[:space:]]*//' | xargs)
+    [[ -z "$display" ]] && display="$slug"
+
+    areas_arr=$(echo "$areas_arr" | jq \
+      --arg slug "$slug" --arg display "$display" --argjson rank "$rank" \
+      '. + [{slug: $slug, display: $display, rank: $rank}]')
+    rank=$((rank + 1))
+  done < <(awk -F'|' '
+    ($2 ~ /Areas\// || $2 ~ /Personal\//) {
+      s=$3; gsub(/[`[:space:]]/, "", s)
+      if (s ~ /^[a-z0-9-]+$/) {
+        folder=$2
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", folder)
+        gsub(/\(.*\)/, "", folder)
+        gsub(/`/, "", folder)
+        gsub(/[[:space:]]+$/, "", folder)
+        print folder "\x01" s
+      }
+    }' "$VAULT/AGENTS.md")
+
+  echo "$areas_arr"
+}
+
 fm_value() {
   local file="$1" key="$2"
   get_frontmatter "$file" | grep "^${key}:" | head -1 | sed "s/^${key}: *//" | sed 's/^["'"'"']//;s/["'"'"']$//'
@@ -695,6 +736,68 @@ gather_evening() {
     '{found: false, date: null, source: null, content: null, path: null, reason: $reason}'
 }
 
+# ── Today's Meeting Notes ────────────────────────────────────────────
+# Generic `type: meeting` frontmatter scan for TARGET_DATE — independent of
+# any specific meeting-prep tooling. `is_prep` just flags notes tagged
+# meeting-prep or titled "... Meeting Prep" so the render layer can call
+# out prep notes distinctly; absence of any prep notes degrades gracefully
+# (render layer shows "no meeting notes found").
+
+gather_meetings_today() {
+  local result="[]"
+  local count=0
+  local prep_count=0
+  local dated_files
+  dated_files=$(search_by_date_property "$TARGET_DATE")
+
+  while IFS= read -r rel_path; do
+    [[ -z "$rel_path" ]] && continue
+    local file="$VAULT/$rel_path"
+    [[ -f "$file" ]] || continue
+    local note_type
+    note_type=$(fm_value "$file" "type" | xargs)
+    [[ "$note_type" == "meeting" ]] || continue
+
+    local title status area project start end tags_raw tags_json is_prep
+    title=$(basename "$rel_path" .md)
+    status=$(fm_value "$file" "status" | xargs)
+    area=$(fm_value "$file" "area" | xargs)
+    project=$(fm_value "$file" "project" | xargs)
+    start=$(fm_value "$file" "start" | xargs)
+    end=$(fm_value "$file" "end" | xargs)
+    tags_raw=$(fm_list "$file" "tags")
+    if [[ -n "$tags_raw" ]]; then
+      tags_json=$(echo "$tags_raw" | jq -R . | jq -s .)
+    else
+      tags_json="[]"
+    fi
+    is_prep=false
+    if echo "$tags_raw" | grep -qx "meeting-prep" || [[ "$title" == *"Meeting Prep"* ]]; then
+      is_prep=true
+      prep_count=$((prep_count + 1))
+    fi
+
+    result=$(echo "$result" | jq \
+      --arg path "$rel_path" \
+      --arg title "$title" \
+      --arg status "$status" \
+      --arg area "$area" \
+      --arg project "$project" \
+      --arg start "$start" \
+      --arg end "$end" \
+      --argjson tags "$tags_json" \
+      --argjson is_prep "$is_prep" \
+      '. += [{path: $path, title: $title, status: $status, area: $area, project: $project, start: $start, end: $end, tags: $tags, is_prep: $is_prep}]')
+    count=$((count + 1))
+  done < <(echo "$dated_files" | jq -r '.[]?' 2>/dev/null)
+
+  jq -n \
+    --argjson meetings "$result" \
+    --argjson count "$count" \
+    --argjson prep_count "$prep_count" \
+    '{available: true, meetings: $meetings, count: $count, prep_count: $prep_count}'
+}
+
 # ── Git Commit History (recap window) ────────────────────────────────
 # Walk commits in [from..to] inclusive. Map each commit to projects/areas
 # by inspecting touched files. Subject becomes the candidate theme bullet.
@@ -1083,9 +1186,11 @@ band_projects() {
 
 # ── Gather All Sources ────────────────────────────────────────────────
 
+AREAS=$(gather_areas)
 TODOIST=$(gather_todoist)
 WORKITEMS=$(gather_workitems)
 EVENING=$(gather_evening)
+MEETINGS=$(gather_meetings_today)
 TASK_NOTES=$(gather_task_notes)
 COMMITS=$(gather_commits "$(echo "$WINDOW_WORK" | jq -r '.recap_window.from')" "$(echo "$WINDOW_WORK" | jq -r '.recap_window.to')")
 ACTIVE_PROJECTS=$(gather_active_projects)
@@ -1114,6 +1219,9 @@ task_notes_todo=$(echo "$TASK_NOTES" | jq -r '.todo_count' 2>/dev/null || echo 0
 task_notes_active=$(echo "$TASK_NOTES" | jq -r '.active_count' 2>/dev/null || echo 0)
 task_notes_on_hold=$(echo "$TASK_NOTES" | jq -r '.on_hold_count' 2>/dev/null || echo 0)
 task_notes_errors=$(echo "$TASK_NOTES" | jq -r '.errors | length' 2>/dev/null || echo 0)
+areas_count=$(echo "$AREAS" | jq 'length' 2>/dev/null || echo 0)
+meetings_count=$(echo "$MEETINGS" | jq -r '.count' 2>/dev/null || echo 0)
+meeting_prep_count=$(echo "$MEETINGS" | jq -r '.prep_count' 2>/dev/null || echo 0)
 
 if [[ "$window_beyond" == "true" ]]; then
   recap_summary="beyond lookback: no captured work in last 7 days"
@@ -1134,7 +1242,9 @@ MANIFEST=$(jq -n \
   --arg evening "$(if [[ "$evening_found" == "true" ]]; then echo "success"; else echo "not found"; fi)" \
   --arg task_notes "$(if [[ "$task_notes_errors" -eq 0 ]]; then echo "success: $task_notes_count found ($task_notes_todo todo, $task_notes_active active, $task_notes_on_hold on-hold)"; else echo "partial: $task_notes_count found, $task_notes_errors errors"; fi)" \
   --arg project_recency "success: ${warm_count} warm, ${cold_count} cold, ${hot_count} hot (suppressed)" \
-  '{recap_window: $recap, todoist: $todoist, workitems: $workitems, evening: $evening, task_notes: $task_notes, project_recency: $project_recency, linear: "pending (MCP — call from skill)", calendar: "not implemented"}')
+  --arg areas "$(if [[ "$areas_count" -gt 0 ]]; then echo "success: $areas_count area(s) parsed from AGENTS.md"; else echo "degraded: no areas table found in AGENTS.md — area ordering/wikilinks fall back to generic per-slug display"; fi)" \
+  --arg meetings "success: $meetings_count meeting note(s), $meeting_prep_count prep note(s)" \
+  '{recap_window: $recap, todoist: $todoist, workitems: $workitems, evening: $evening, meetings: $meetings, task_notes: $task_notes, project_recency: $project_recency, areas: $areas, linear: "pending (MCP — call from skill)", calendar: "not implemented"}')
 
 # ── Output Combined JSON ─────────────────────────────────────────────
 
@@ -1153,12 +1263,14 @@ jq -n \
   --argjson todoist "$TODOIST" \
   --argjson workitems "$WORKITEMS" \
   --argjson evening "$EVENING" \
+  --argjson meetings "$MEETINGS" \
   --argjson task_notes "$TASK_NOTES" \
   --argjson commits "$COMMITS" \
   --argjson active_projects "$ACTIVE_PROJECTS" \
   --argjson hot "$HOT" \
   --argjson warm "$WARM" \
   --argjson cold "$COLD" \
+  --argjson areas "$AREAS" \
   --argjson source_manifest "$MANIFEST" \
   '{
     dates: {today: $today, today_day: $today_day, yesterday: $yesterday, yesterday_day: $yesterday_day},
@@ -1167,11 +1279,13 @@ jq -n \
     todoist: $todoist,
     workitems: $workitems,
     evening: $evening,
+    meetings_today: $meetings,
     task_notes: $task_notes,
     commits: $commits,
     active_projects: $active_projects,
     hot: $hot,
     warm: $warm,
     cold: $cold,
+    areas: $areas,
     source_manifest: $source_manifest
   }'

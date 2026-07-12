@@ -1,6 +1,6 @@
 ---
 name: process-journal
-description: Process a morning journal entry — extract AI summary, mood, priorities, gratitude, and people mentioned. Full insights go to the journal entry; all priorities grouped as Must do / Focus work / If time go to the daily hub. Extracted priorities become Todoist tasks (with dedup and batch approval). Use when the user says "process journal", "process today's journal", or "/process-journal".
+description: Process a morning journal entry — extract AI summary, mood, gratitude, people, and daily planning intent. Write private reflection to the journal and render the committed daily hub as Work Anchor, Control Queue, Today's Plan, and Routing Exceptions. Extracted actionable items can become task notes/Todoist mirrors with dedup and batch approval. Use when the user says "process journal", "process today's journal", or "/process-journal".
 user-invocable: true
 allowed-tools:
   # Obsidian CLI (file read/write via Bash)
@@ -22,18 +22,20 @@ allowed-tools:
   - Bash(td comment:*)
   # Process-journal scripts (data collection + git commit)
   - Bash(bash ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/*.sh:*)
+  - Bash(bash ${CLAUDE_PLUGIN_ROOT}/skills/start-day/scripts/match_task_note.sh:*)
+  - Bash(python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/*.py:*)
   - Bash(chmod:*)
 ---
 
 # Process Journal
 
-Extract structured insights from a raw morning journal transcript. Write the full AI analysis to the **journal entry** (private) and a grouped priority list to the **daily hub** (visible).
+Extract structured insights from a raw morning journal transcript. Write the full AI analysis to the **journal entry** (private) and a daily operating plan to the **daily hub** (visible).
 
 ## Key Principles
 
 1. **The raw transcript stays untouched.** The voice transcript under `## Morning` and `## Evening` is never modified.
 2. **Full insights go to the journal entry.** The `### AI Summary` section (with mood, all priorities, gratitude) replaces the placeholder at the bottom of the journal entry (nested under `## Morning`). This is the private reflection space.
-3. **The daily hub gets Today's priorities.** This is the ONLY place priorities are written — not the morning entry. ALL priorities are included (work and personal), grouped by urgency: Must do / Focus work / If time. The grouping replaces the old area-based filter.
+3. **The daily hub gets the committed operating plan.** This is the ONLY place the Work Anchor, Control Queue, Today's Plan, and Routing Exceptions are written — not the morning entry. The old Must do / Focus work / If time render is deprecated for v3.
 4. **No silent failures.** Track every external source call. Report what succeeded, what failed, and what was skipped. See `vault-config/references/source-manifest.md`.
 
 ## Sources
@@ -86,7 +88,7 @@ Pass `--dry-run` as the second argument after any date: `/process-journal 2026-0
 # Journal entry (raw transcript)
 obsidian read path="5. Resources/Personal/Journal/Morning Entries/YYYY-MM-DD.md"
 
-# Daily note hub (target for Today's priorities)
+# Daily note hub (target for Work Anchor / Control Queue / Today's Plan)
 obsidian read path="1. Daily/YYYY-MM-DD.md"
 ```
 
@@ -143,6 +145,46 @@ obsidian read path="5. Resources/Personal/Journal/Morning Entries/YYYY-MM-DD.md"
 ### Step 5: Extract Insights from Journal
 
 Extraction is no longer transcript-only. It runs five reads in parallel and merges the outputs into a unified "candidate priorities" list with provenance. Each candidate carries `{text, source, project_hint, lane_hint, context, ai_capability}` so Step 7 (task-note creation) and Step 8 (render) can set the right frontmatter tags and capability markers respectively.
+
+#### 5-v3: Local Query Contract for Daily Planning
+
+Before making any lane decisions, run the deterministic v3 gatherer:
+
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/gather_daily_plan_context.py TARGET_DATE "${PERSONAL_OS_VAULT:-$HOME/Claude/ObsidianVault}" > "$TMPDIR/process-journal-v3-context.json"
+```
+
+This script treats frontmatter as the local API and returns structured candidates:
+
+| Bucket | Deterministic sources |
+|---|---|
+| `focus` | `type: task` with `status: todo/active`, due/scheduled today, or transcript/start-day project match |
+| `review` | today's `type: meeting` prep/capture notes, source warnings from the `/start-day` cockpit |
+| `decide` | task notes tagged `ai-pending-decision`, tasks with `blocked_by`, meeting prep `Decisions needed` |
+| `dispatch` | task notes tagged `ai-handoff`, unblocked, with staged/reviewable output |
+| `anchor` | habit frontmatter, mood/energy signals |
+| `routing_exceptions` | always empty from the gatherer — flagging a transcript pointer that needs a new canonical home is a model judgment call made in this step and Step 7, not something inferable generically from frontmatter |
+
+Minimum bar for a daily-hub item:
+- It has a source: transcript, start-day cockpit, task note, meeting note, or source warning.
+- It has or needs a canonical home: project hub, task note, meeting note, devlog, or explicit routing exception.
+- It matters today.
+- It has a next action, next question, or verification action.
+
+Lane assignment is intentionally boring:
+
+```text
+Is it today's main human work? -> Focus
+Does existing evidence need verification? -> Review
+Is there a human fork/blocker? -> Decide
+Can AI move it safely with context and staging? -> Dispatch
+Is it health/life/sustainability? -> Anchor
+Otherwise -> keep it in /start-day Threads To Keep Visible, not the daily hub
+```
+
+The model may synthesize the Work Anchor and timeboxed plan from this JSON, but it should not invent lane items outside these queried candidates. If the transcript mentions something important but no canonical object exists, put it in `Routing Exceptions` and create/propose the correct task or note in Step 7.
+
+Area ordering used for sorting candidates (`priority_sort`/`focus_sort` in the gatherer) is parsed at runtime from this vault's own `AGENTS.md` areas table — never hardcode an area list here.
 
 #### 5a: Read all five sources
 
@@ -260,7 +302,20 @@ Persist the classification on the candidate as `ai_capability`. Step 7 (task-cre
 
 ### Step 6: Write AI Summary to Journal Entry
 
-The `### AI Summary` heading already exists at the bottom of the journal entry (placed by `ensure_journal.sh` with placeholder text, nested under `## Morning`). Replace its content using a heading-targeted patch.
+The `### AI Summary` heading already exists at the bottom of the journal entry (placed by `ensure_journal.sh` with placeholder text, nested under `## Morning`). Render the private summary from the same v3 context JSON used by the daily hub, then replace the heading body.
+
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/gather_daily_plan_context.py TARGET_DATE "${PERSONAL_OS_VAULT:-$HOME/Claude/ObsidianVault}" > "$TMPDIR/process-journal-v3-context.json"
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/render_ai_summary.py "$TMPDIR/process-journal-v3-context.json" > "$TMPDIR/process-journal-ai-summary.md"
+```
+
+Script-only runs may apply the rendered summary directly:
+
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/write_ai_summary.py "$TMPDIR/process-journal-v3-context.json" "${PERSONAL_OS_VAULT:-$HOME/Claude/ObsidianVault}"
+```
+
+Interactive skill runs compose the full body — the rendered work-signal paragraphs from `render_ai_summary.py`, plus the model's own Mood/Gratitude/People-mentioned extraction from the transcript (per the extraction rules below) — and patch it in one call:
 
 ```python
 mcp__obsidian-mcp-tools__patch_vault_file(
@@ -268,7 +323,8 @@ mcp__obsidian-mcp-tools__patch_vault_file(
     operation="replace",
     targetType="heading",
     target="AI Summary",
-    content="""**Summary**: [extracted summary]
+    content="""<rendered paragraphs from process-journal-ai-summary.md>
+
 **Mood**: [extracted mood]
 **Gratitude**:
 1. [item 1]
@@ -296,7 +352,7 @@ If not found: `[[{Contact}]]` (red link — creates page when clicked)
 
 1. **Summary and mood**: Replace with fresh extraction (these are subjective — always use the latest read)
 2. **Gratitude and people**: Replace with fresh extraction
-3. **Today's priorities**: merge existing + newly extracted priorities in Step 8i. Deduplicate by comparing description text. Preserve checkbox state on existing items.
+3. **Daily hub plan**: re-render the v3 Work Anchor / Control Queue / Today's Plan in Step 8. Deduplicate by canonical task/note link where possible.
 
 Use `replace` on the existing `AI Summary` heading instead of `append`. Do NOT include `### AI Summary` in the content when using `replace` — the heading itself is preserved by the patch tool.
 
@@ -505,9 +561,52 @@ Where `timestamp` is `YYYYMMDDHHMM` (e.g., `202604201239`) and `todoist_count` i
 
 **Do NOT** set any frontmatter flag — `todoist_tasks_created` and `journal_processed` are both dropped. The marker line is the sole idempotency source.
 
-### Step 8: Write Today's Priorities to Daily Hub
+### Step 8: Write Daily Hub v3
 
-This step composes the 6-lane priorities block and writes it to the daily hub via a single MCP heading patch on `Morning Journal`. The lanes are populated from the merged candidate list produced in Step 5g, classified by `lane_hint`, then rendered with capability markers, inline chain back-references, and contextual suffixes. By the time this step runs, Step 7 has already created task notes for every actionable candidate — so every bullet wikilinks to a real note, no `(no task note — create)` placeholders.
+This step writes the committed daily operating plan to the daily hub via a single heading patch on `Morning Journal`. For v3, use the deterministic context and renderer scripts:
+
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/gather_daily_plan_context.py TARGET_DATE "${PERSONAL_OS_VAULT:-$HOME/Claude/ObsidianVault}" > "$TMPDIR/process-journal-v3-context.json"
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/render_daily_hub_v3.py "$TMPDIR/process-journal-v3-context.json" > "$TMPDIR/process-journal-v3-hub.md"
+```
+
+The rendered block must use this section contract:
+
+```markdown
+> [[5. Resources/Personal/Journal/Morning Entries/TARGET_DATE|Open Morning Entry]]
+
+### Work Anchor
+### Control Queue
+**Focus**
+**Review**
+**Decide**
+**Dispatch**
+**Anchor**
+### Today's Plan
+### Routing Exceptions
+```
+
+`Routing Exceptions` is conditional. Render it only when the gatherer found a placement/correction/verification issue.
+
+Patch via:
+
+```python
+mcp__obsidian-mcp-tools__patch_vault_file(
+    filename=f"1. Daily/{today}.md",
+    operation="replace",
+    targetType="heading",
+    target="Morning Journal",
+    content="<full v3 block from process-journal-v3-hub.md>",
+)
+```
+
+The model may refine the Work Anchor and plan wording after reading the context JSON, but it must preserve the queried lane membership unless it can point to a source object in `process-journal-v3-context.json`.
+
+#### 8-legacy: Six-Lane Priorities Renderer (deprecated for v3)
+
+The notes below describe the old Must do / Focus work / If time / Could hand off / Also on radar / Execution strategy renderer. Do not use them for current v3 daily hubs.
+
+This legacy step composes the 6-lane priorities block and writes it to the daily hub via a single MCP heading patch on `Morning Journal`. The lanes are populated from the merged candidate list produced in Step 5g, classified by `lane_hint`, then rendered with capability markers, inline chain back-references, and contextual suffixes. By the time this step runs, Step 7 has already created task notes for every actionable candidate — so every bullet wikilinks to a real note, no `(no task note — create)` placeholders.
 
 #### 8-pre: Read existing hub state
 
@@ -734,10 +833,13 @@ Journal processed for YYYY-MM-DD.
 **Summary**: [2-3 sentence summary]
 **Mood**: [mood]
 **Habits**: N/M completed (list checked items, note missed items)
-**Priorities**: [count] items extracted, grouped to the daily hub as:
-  - Must do: N
-  - Focus work: N
-  - If time: N
+**Daily hub**: v3 plan rendered:
+  - Focus: N
+  - Review: N
+  - Decide: N
+  - Dispatch: N
+  - Anchor: N
+  - Routing Exceptions: N
 **Todoist**: [created count] tasks created, [initiative count] initiatives, [skip count] skipped, [existing count] already existed
 **Gratitude**: [3 items written to journal / already present / ⚠️ not mentioned — prompt shown]
 **People**: [list or "none mentioned"]
@@ -763,7 +865,16 @@ Daily hub updated: [[1. Daily/YYYY-MM-DD]]
 
 Only include the Warnings and Fix sections if there are actual warnings.
 
-## Verification (5/18 fixture)
+## Verification (v3 render contract)
+
+Before shipping a change to Step 5, Step 7, Step 8, or the v3 gather/render scripts, feed `gather_daily_plan_context.py` a fixture vault (or synthetic context JSON matching its documented output shape) and confirm:
+
+- the deterministic local gather creates Focus, Review, Decide, Dispatch, and Anchor candidates (Routing Exceptions stays empty unless the model adds one in Step 5/7)
+- `render_daily_hub_v3.py`'s output includes `### Work Anchor`, `### Control Queue`, `### Today's Plan`, and conditional `### Routing Exceptions`
+- the old `**Today's priorities:**` block does not render
+- the work-budget sentence (`5.5-6.5 usable focus hours`) stays visible
+
+## Verification (legacy 5/18 fixture)
 
 The 2026-05-18 daily hub is the byte-level regression target for the v2 render shape. After any change to Step 5 / Step 7 / Step 8, run a dry-run against 2026-05-18 and diff vs the committed hub.
 
@@ -822,7 +933,7 @@ When analyzing the raw transcript:
 | Already processed (bottom marker line present) | Warn and ask. On confirm: refresh AI Summary and re-classify priorities (preserve task notes already created) |
 | Journal is empty / very short | Extract what you can, note brevity |
 | No priorities mentioned | Write "No explicit priorities mentioned" in both locations |
-| No priorities extracted | Daily hub shows "**Today's priorities:** None for today" |
+| No daily-plan candidates extracted | Daily hub renders the v3 section scaffold with empty-state bullets in each lane |
 | No explicit gratitude | Write "⚠️ No gratitude entry today. What are 3 things you're grateful for?" — never fabricate gratitude items |
 | No people mentioned | Omit the "People mentioned" line |
 | Evening section present | Only process `## Morning` section (ignore Evening) |

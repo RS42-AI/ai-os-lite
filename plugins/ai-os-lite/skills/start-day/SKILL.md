@@ -1,6 +1,6 @@
 ---
 name: start-day
-description: Morning prep that writes a "Yesterday" recap and today's context to the journal page before you record. Creates the context that makes voice journal entries specific and actionable. Use when the user says "start day", "morning prep", or "/start-day".
+description: Morning prep that writes a daily cockpit into the journal page before you record: Overall Read, Movement, candidate Control Queue, Threads To Keep Visible, and At Risk. Creates the context that makes voice journal entries specific and actionable. Use when the user says "start day", "morning prep", or "/start-day".
 user-invocable: true
 allowed-tools:
   # Gather script (deterministic context collection)
@@ -87,6 +87,9 @@ Parse the JSON output. It contains:
 - `todoist` — overdue + today tasks
 - `workitems` — external work-item integration (inert stub — connect Linear via MCP)
 - `evening` — last night's reflection content
+- `meetings_today` — today's `type: meeting` notes found by local frontmatter reads, including `is_prep`, `start`, `end`, `tags`, `area`, and `project`
+- `task_notes` — task-note frontmatter, including `path`, `status`, `priority`, `due_date`, `area`, `project`, `tags`, and `blocked_by`
+- `areas` — ordered `[{slug, display, rank}, ...]` parsed from this vault's own `AGENTS.md` areas table (`| Area folder | \`area\` slug |`), in table row order. This is the single source of truth for area ordering and area-hub wikilink targets in the v3 cockpit render — never a hardcoded area list. An empty array means the table is missing/unparseable; the renderer degrades to a generic per-slug display and unranked (rank 99) ordering rather than crashing.
 - `source_manifest` — what succeeded and what failed
 
 If the script fails to execute, check that it has execute permission:
@@ -139,6 +142,41 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/start-day/scripts/ensure_daily_hub.sh TARGET_D
 **If `files.journal_has_context` is true**: This is a re-run. Replace the existing context sections.
 
 ## Step 4: Interpret and Write
+
+### 4-v3: Daily Cockpit Render (authoritative)
+
+Use the deterministic renderer for the current `/start-day` cockpit shape. The legacy `Recent Accomplishments` instructions below (4-legacy) are retained as historical reference only; do **not** render the old `Recent Accomplishments` / `Last Night's Reflection` block for current runs.
+
+Render from the gather JSON:
+
+```bash
+bash ${CLAUDE_PLUGIN_ROOT}/skills/start-day/scripts/gather_morning_context.sh TARGET_DATE > "$TMPDIR/start-day-context.json"
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/start-day/scripts/render_start_day.py "$TMPDIR/start-day-context.json" > "$TMPDIR/start-day-cockpit.md"
+```
+
+The rendered cockpit block has this section contract:
+
+```markdown
+### Overall Read
+### Movement From Yesterday +/- 1
+---
+### Control Queue
+### Threads To Keep Visible
+#### At Risk
+```
+
+Optional model synthesis is allowed only inside short prose sentences:
+- `Recent trend`
+- `Key insight for today`
+- parent-bullet summaries in `Movement`
+
+Do not change the section order, remove source warnings, invent meetings, or invent tasks. Meeting Prep must come from `meetings_today`; Review/Decide/Dispatch candidates must come from `task_notes`, `meetings_today`, or `source_manifest`. Area order and area-hub wikilinks come from `areas` (see Step 1) — never hardcode an area list or wikilink target.
+
+Patch the rendered block into the morning journal by replacing the existing cockpit region from `### Overall Read` through `#### At Risk`. If the journal still has the legacy `## Recent Accomplishments` scaffold, replace that legacy block with the v3 cockpit block.
+
+`/start-day` still does **not** write the daily hub. `/process-journal` owns the daily hub after the morning entry exists.
+
+### 4-legacy: Historical Render Notes (do not use for current v3 runs)
 
 Read `references/context-format.md` for exact formatting rules.
 
