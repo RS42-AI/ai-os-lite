@@ -89,7 +89,7 @@ obsidian read path="5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD.md"
 **If it doesn't exist**: Create it with the evening template content (resolved, not Templater syntax):
 
 ```bash
-obsidian create path="5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD.md" content="---\ndate: YYYY-MM-DD\ntype: journal\njournal_type: evening\ntags:\n  - journal\nhabit_evening_meditation: false\nhabit_journaled: false\ntodoist_tasks_created: false\n---\n\n## Evening Habits\n- [ ] Evening meditation\n- [ ] Journaled\n\n### Today's Accomplishments\n\n### Tomorrow Preview\n\n### Wind Down\n\n---\n## Evening\n\n\n## Reflection\n\n**What went well today:**\n\n\n**What could I improve:**\n\n\n**Grateful for:**\n1.\n2.\n3.\n\n---\n\n###### Still Open\n"
+obsidian create path="5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD.md" content="---\ndate: YYYY-MM-DD\ntype: journal\njournal_type: evening\ntags:\n  - journal\nhabit_journaled: false\ntodoist_tasks_created: false\n---\n\n## Evening Habits\n- [ ] Journaled\n\n### Today's Accomplishments\n\n### Tomorrow Preview\n\n### Wind Down\n\n---\n## Evening\n\n\n## Reflection\n\n**What went well today:**\n\n\n**What could I improve:**\n\n\n**Grateful for:**\n1.\n2.\n3.\n\n---\n\n###### Still Open\n"
 ```
 
 **If it already exists**: Check for existing `### Today's Accomplishments` section. If present, replace individual sections (idempotent re-run).

@@ -80,22 +80,22 @@ obsidian read path="5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD.md"
 
 ### Step 3: Parse Evening Habits
 
-Read the `## Evening Habits` section from the evening entry. Parse each checkbox:
+Read the `## Evening Habits` section from the evening entry and parse **every** checkbox present — do not assume a fixed set. The evening journal template owns the habit schema; users add their own habits as checkbox lines with matching `habit_*` frontmatter properties. Map each checkbox label to its property slug (lowercase, spaces → underscores, prefixed `habit_`):
 
 ```markdown
 ## Evening Habits
-- [x] Evening meditation      → habit_evening_meditation: true
 - [x] Journaled               → habit_journaled: true
+- [ ] <Any user-added habit>  → habit_<any_user_added_habit>: false
 ```
 
-**Update frontmatter** with parsed habit data:
+**Update frontmatter** for each parsed habit (example shown for `habit_journaled`; repeat per habit found):
 
 ```python
 mcp__obsidian-mcp-tools__patch_vault_file(
     filename="5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD.md",
     operation="replace",
     targetType="frontmatter",
-    target="habit_evening_meditation",
+    target="habit_journaled",
     content="true"
 )
 # Repeat for habit_journaled
@@ -422,7 +422,7 @@ Also check morning entries for the `habit_*` frontmatter fields — read whateve
 Report:
 - **Current streaks**: "Meditation: 2 days, Workout: 4 days, Vitamins: 5 days"
 - **Broken streaks**: "Workout streak ended today (was 5 days)"
-- **Nudges for unchecked evening habits**: "Evening meditation unchecked — still time tonight?"
+- **Nudges for unchecked evening habits**: "<Habit> unchecked — still time tonight?" (use the user's actual habit labels from their entry)
 
 #### 7b: Decision-Loop Detection
 
