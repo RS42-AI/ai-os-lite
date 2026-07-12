@@ -420,8 +420,8 @@ obsidian read path="5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD-2.m
 Also check morning entries for the `habit_*` frontmatter fields — read whatever `habit_*` properties the morning entry carries; the schema is owned by the journal template (`system-settings/Templates/Journal Entry Template.md`), not this skill.
 
 Report:
-- **Current streaks**: "Meditation: 2 days, Workout: 4 days, Vitamins: 5 days"
-- **Broken streaks**: "Workout streak ended today (was 5 days)"
+- **Current streaks**: "<Habit A>: 2 days, <Habit B>: 4 days" (use the user's actual habit labels)
+- **Broken streaks**: "<Habit> streak ended today (was 5 days)"
 - **Nudges for unchecked evening habits**: "<Habit> unchecked — still time tonight?" (use the user's actual habit labels from their entry)
 
 #### 7b: Decision-Loop Detection
@@ -433,7 +433,7 @@ mcp__qmd__vector_search(query="<decision topic>", collection="vault")
 ```
 
 If the same topic appears in 3+ recent entries, flag it:
-- "You've mentioned [topic] in N of the last M entries. Consider scheduling a focused decision session or checking your Life Strategy Matrix."
+- "You've mentioned [topic] in N of the last M entries. Consider scheduling a focused decision session."
 
 #### 7c: Habit Slip Awareness (Sensitive — No Shame)
 
@@ -532,7 +532,7 @@ Evening processed for YYYY-MM-DD.
 
 **Summary**: [2-3 sentences]
 **Mood**: [mood]
-**Habits**: N/M evening habits | Streaks: [workout Xd, meditation Xd, ...]
+**Habits**: N/M evening habits | Streaks: [<habit> Xd, ...]
 **Task triage**: N closed, N deferred, N kept | N new tasks created for tomorrow
 **Patterns**: [any flags from Step 7]
 

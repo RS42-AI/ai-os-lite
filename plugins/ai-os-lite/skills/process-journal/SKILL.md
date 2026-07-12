@@ -248,7 +248,7 @@ For each candidate priority surfaced by 5a/5b/5c that has an associated project 
 4. On **Confirm**:
    - For each proposed blocker that resolves to an existing task note → use its wikilink.
    - For each proposed blocker without a task note → flag for Task-Note Creation in Step 7 (do **not** auto-create here; the user reviews the batch then).
-   - **5/18 delta (Decision 6) — Insight→action rule**: For EACH confirmed chain, ALSO propose the **first concrete unblock-step task** (verb + target). Examples: `"Email NACA advisor to set meeting date"`, `"Confirm IRS extension status and schedule tax-return prep block"`. The user confirms creation; Step 7 (the task-creation step) then creates the task note with `← unblocks <chain>` reasoning written into the body. No chain gets confirmed without producing at least one concrete actionable task — vague execution-strategy steps are not acceptable.
+   - **5/18 delta (Decision 6) — Insight→action rule**: For EACH confirmed chain, ALSO propose the **first concrete unblock-step task** (verb + target). Examples: `"Email {advisor} to set a meeting date"`, `"Confirm {deadline} status and schedule the prep block"`. The user confirms creation; Step 7 (the task-creation step) then creates the task note with `← unblocks <chain>` reasoning written into the body. No chain gets confirmed without producing at least one concrete actionable task — vague execution-strategy steps are not acceptable.
    - Write `blocked_by:` to the priority's task note frontmatter (only if the task note exists).
 5. On **Edit**: ask which blockers should actually apply. Re-prompt with the corrected list. Same Decision-6 rule on confirmation.
 6. On **Skip**: write `blocked_by: none` to the task note. This is the permanent "user confirmed no blockers" marker — never re-infer.
@@ -256,7 +256,7 @@ For each candidate priority surfaced by 5a/5b/5c that has an associated project 
 If no task note exists for the priority and the user confirms blockers, the `blocked_by` write is deferred to Step 7 (the task-creation step, when the task note is created). The chain back-reference renders inline on the bullet in Step 8 (the render step) from the in-memory result, formatted per the 5/18 delta:
 - `← unblocks <plain description>`
 - `← part of the <cluster name>` (e.g. "the reply-debt cluster")
-- `← starts the <path name>` (e.g. "the NACA approval path (next: advisor meeting → approval → city decision)")
+- `← starts the <path name>` (e.g. "the {application} approval path (next: advisor meeting → approval → decision)")
 
 #### 5e: Contact re-grounding (per named person)
 
@@ -673,7 +673,7 @@ Render each lane only if it has at least one bullet. Lane order is FIXED:
    - [[Re-orient on {WorkArea} work — status and next steps]] *(carry-forward p2 from 5/16; no concrete edge today — stay aware)*
      ↳ Warm sub-projects under this:
        • [[{Project3}]] — 7d since [[Request {Project3} license from {Contact1}]]
-       • [[{Project2}]] — 14d since [[2026-05-04 - Post-PTO Re-entry, Goals Sent, Trainings Completed]] *(just flipped Warm → Cold)*
+       • [[{Project2}]] — 14d since [[2026-05-04 - {Last Session Title}]] *(just flipped Warm → Cold)*
    ```
    (Note: the carry-forward-p2-with-no-edge example actually belongs in "Also on the radar" per Decision 9 — included here only to show the sub-project nesting pattern. Sub-project bullets come from Step 5c's parent-resolution.)
 
@@ -708,7 +708,7 @@ N. **<Phase label>** → <wikilink(s) to bullets above> (<lane reference>)
 Examples (5/18 fixture):
 ```
 1. **Now** → [[Ship /process-journal v2 today]] (Must do)
-2. **Quick discovery** → [[Email NACA advisor to set meeting date]] + [[Confirm IRS extension status and schedule tax-return prep block]] (Must do)
+2. **Quick discovery** → [[Email {advisor} to set meeting date]] + [[Confirm {deadline} status and schedule prep block]] (Must do)
 3. **Reply batch — single 30-min block** → [[Reply to {Contact}...|{Contact}]] · [[Reply to {Contact1}...|{Contact1}]] · ... (Must do)
 4. **🤖 Dispatch AI handoffs in background** → [[Mobile app bug review and fix pass|Portfolio fix]] · ... (Could hand off to AI — all N)
 N. **Before EOD** *(housekeeping — not bullets)* → confirm carry-forward outcomes, lock fork decisions

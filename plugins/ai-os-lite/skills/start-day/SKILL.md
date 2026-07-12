@@ -439,8 +439,8 @@ After the atomic patch in 4d lands, scan the recap window for **orphan clusters*
 
 Synthesize the proposal from the note titles, project, and a quick read of each note (use `obsidian read path=...` if titles aren't enough — keep it under 30s of reading per cluster). The title should be **session-shaped** (verb-first or theme-first), not a list of every note. Examples:
 
-- 6 notes about {Project} vocabulary, hierarchy, lane-based hub on 5/5 → `2026-05-05 - {Project} Vocabulary Lock — Four Layers, Lane-Based Render, Idea Ranch`
-- 3 notes about Hermes pilot wiring on 5/4 → `2026-05-04 - Hermes Pilot B Prep — Skill Portability and Heartbeat Wiring`
+- 6 notes about {Project} vocabulary and hub architecture on 5/5 → `2026-05-05 - {Project} Vocabulary Lock — Naming Decisions and Hub Architecture`
+- 3 notes about {Project} pilot wiring on 5/4 → `2026-05-04 - {Project} Pilot Prep — Portability and Scheduling Wiring`
 
 Present each cluster like this and ask the user to confirm:
 
@@ -448,17 +448,17 @@ Present each cluster like this and ask the user to confirm:
 Detected orphan cluster: 6 notes from 2026-05-05 (project: {project-slug})
 
 Notes:
-  - [[Commitment Lifecycle and Daily Render — Vocabulary and Data Flow]]
-  - [[Solo Founder Hierarchy — Four Layers Beats Six]]
-  - [[Goal Initiative Project Task — Glossary for Solo Founder Operating System]]
-  - [[Idea Ranch — AI-Shepherded Idea Pipeline]]
-  - [[Initiative — Two Meanings in Current Vault and How to Resolve]]
-  - [[{Project} Lane-Based Daily Hub Architecture — Process-Journal v2 Proposal]]
+  - [[{Project} Vocabulary — Data Flow and Daily Render]]
+  - [[{Project} Hierarchy — Choosing the Layer Model]]
+  - [[Glossary for the {Project} Operating Model]]
+  - [[{Idea Name} — Idea-Pipeline Brainstorm]]
+  - [[Terminology Conflict — Two Meanings in the Current Vault]]
+  - [[{Project} Daily Hub Architecture — Proposal]]
 
 Proposed retroactive devlog:
-  Title:   2026-05-05 - {Project} Vocabulary Lock — Four Layers, Lane-Based Render, Idea Ranch
+  Title:   2026-05-05 - {Project} Vocabulary Lock — Naming Decisions and Hub Architecture
   Project: {project-slug}
-  Area:    rs42
+  Area:    {area}
   Tasks:   (none — design session)
   Body:    wikilinks to all 6 notes + 1-line brief per note
 ```
