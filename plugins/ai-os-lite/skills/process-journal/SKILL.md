@@ -109,7 +109,7 @@ obsidian read path="5. Resources/Personal/Journal/Morning Entries/YYYY-MM-DD.md"
   | awk '/^---$/{c++; next} c==1 && /^habit_/'
 ```
 
-This lists each `habit_*: value` pair the entry carries (currently `habit_workout`, `habit_meditation`, `habit_gratitude`, `habit_vitamins` — but read what's there, don't hardcode). `habit_gratitude` may be set to `true` during Step 6 if 3 gratitude items are extracted.
+This lists each `habit_*: value` pair the entry carries (e.g. the starter set `habit_journaled`, `habit_exercise` — but read what's there, don't hardcode; users define their own set in the journal template). If the user tracks a gratitude habit (`habit_gratitude`), it may be set to `true` during Step 6 when 3 gratitude items are extracted.
 
 No parsing or syncing needed — frontmatter IS the data.
 

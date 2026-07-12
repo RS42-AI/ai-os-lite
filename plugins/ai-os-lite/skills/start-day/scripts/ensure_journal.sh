@@ -36,18 +36,27 @@ type: journal
 journal_type: morning
 tags:
   - journal
-habit_workout: false
-habit_meditation: false
-habit_gratitude: false
-habit_vitamins: false
+habit_journaled: false
+habit_exercise: false
 ---
 
-# [[1. Daily/${TARGET_DATE}|${TARGET_DATE}]]
+# Daily Hub: [[1. Daily/${TARGET_DATE}|${TARGET_DATE}]]
 
-## Recent Accomplishments
+### Overall Read
 *(filled by /start-day)*
 
-### Last Night's Reflection
+### Movement From Yesterday +/- 1
+*(filled by /start-day)*
+
+---
+
+### Control Queue
+*(filled by /start-day)*
+
+### Threads To Keep Visible
+*(filled by /start-day)*
+
+#### At Risk
 *(filled by /start-day)*
 
 ---
