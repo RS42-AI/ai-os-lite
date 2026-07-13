@@ -1,6 +1,6 @@
 ---
 name: start-day
-description: Prepare an executive Morning Brief on schedule: Overall Read, Movement, candidate Control Queue, Threads To Keep Visible, and At Risk. The brief stays useful whether or not the user adds optional voice or written context. Use when the user says "start day", "morning brief", "morning prep", or "/start-day".
+description: Prepare an executive Morning Brief manually or when invoked by a scheduler: Overall Read, Movement, candidate Control Queue, Threads To Keep Visible, and At Risk. The brief stays useful whether or not the user adds optional voice or written context. Use when the user says "start day", "morning brief", "morning prep", or "/start-day".
 user-invocable: true
 allowed-tools:
   # Gather script (deterministic context collection)

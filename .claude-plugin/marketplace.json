@@ -12,7 +12,7 @@
     {
       "name": "ai-os-lite",
       "source": "./plugins/ai-os-lite",
-      "description": "AI-OS Lite — a generalized AI operating system providing scheduled Morning Briefs, optional Evening Entries, vault commits, task orchestration, and project sync across Obsidian, Linear, and Todoist.",
+      "description": "AI-OS Lite — a generalized AI operating system providing executive Morning Briefs, optional Evening Entries, vault commits, task orchestration, and project sync across Obsidian, Linear, and Todoist.",
       "category": "productivity",
       "tags": [
         "ai-os",

@@ -1,6 +1,6 @@
 # AI-OS Lite
 
-**An AI operating system for focused human-agent work** — a [Claude Code](https://docs.claude.com/en/docs/claude-code) plugin that turns an [Obsidian](https://obsidian.md) vault into an AI-operated daily workflow: scheduled Morning Briefs, optional free-form input, task orchestration, evening preparation, and project status — all grounded in your own notes.
+**An AI operating system for focused human-agent work** — a [Claude Code](https://docs.claude.com/en/docs/claude-code) plugin that turns an [Obsidian](https://obsidian.md) vault into an AI-operated daily workflow: executive Morning Briefs, optional free-form input, task orchestration, evening preparation, and project status — all grounded in your own notes.
 
 AI-OS Lite reads and writes your vault, syncs work items to [Todoist](https://todoist.com) and [Linear](https://linear.app), and keeps your daily/project hubs current. It's the engine behind a frontmatter-routed, AI-navigable knowledge system.
 
@@ -31,11 +31,13 @@ Eight skills, invoked by natural language or slash commands:
 
 ```bash
 # Add this marketplace
-claude plugin marketplace add RandomStateLabs/ai-os-lite
+claude plugin marketplace add RS42-AI/ai-os-lite
 
 # Install the plugin
 claude plugin install ai-os-lite@ai-os-lite-marketplace
 ```
+
+The skills are **manual by default**. Run `/start-day` when you want the Morning Brief prepared. The same commands are safe to invoke from an external scheduler, but AI-OS Lite does not install or configure that scheduler for you.
 
 Then configure your vault path and conventions in your vault's `AGENTS.md`. The plugin substitutes your real areas, projects, contacts, and work-item prefixes from there at runtime — the skill examples ship with generic `{WorkArea}` / `{Project}` / `{Contact}` placeholders that resolve to *your* data.
 
