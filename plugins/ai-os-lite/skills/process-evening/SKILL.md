@@ -1,6 +1,6 @@
 ---
 name: process-evening
-description: Process an evening journal entry — extract AI summary, mood, habits, gratitude, propose tomorrow's tasks, and detect patterns (streaks, decision loops, habit-slip awareness). The evening mirror of /process-journal. Use when the user says "process evening", "process tonight's journal", or "/process-evening".
+description: Process optional free-form Evening Entry input — write a private AI Summary, triage tasks with approval, and surface only patterns supported by the user's words or user-defined frontmatter. Reflection, gratitude, and lifestyle habits are never required. The evening mirror of /process-morning. Use when the user says "process evening", "process my evening", or "/process-evening".
 user-invocable: true
 allowed-tools:
   # Obsidian CLI (file read/write)
@@ -24,18 +24,18 @@ allowed-tools:
 
 # Process Evening
 
-Process tonight's evening journal entry — extract insights, track habits, propose tomorrow's tasks, and proactively surface patterns. This is Phase B of the evening loop: **AI processes your reflection and prepares you for tomorrow.**
+Process tonight's optional Evening Entry — preserve the raw words, extract useful structure, triage tasks with approval, and prepare tomorrow without imposing a reflection framework.
 
 ## Why This Exists
 
-The evening reflection is the richest signal for self-awareness: what went well, what didn't, how you feel, what you want tomorrow to look like. Without processing, these insights stay locked in prose. `/process-evening` extracts structure from reflection, tracks habits over time, and proactively surfaces patterns the user might not notice.
+When the user chooses to add evening context, `/process-evening` can turn it into a concise private summary, task decisions, and evidence-supported patterns. The scheduled `/prep-evening` output remains useful even when the user adds nothing and never invokes this skill.
 
 ## Key Principles
 
-1. **The raw content stays untouched.** `## Evening` and `## Reflection` sections are never modified.
-2. **Proactive, not passive.** Don't just summarize — detect patterns, flag decision loops, track streaks, and nudge.
-3. **Tomorrow's tasks default to tomorrow.** Unlike `/process-journal` (due today), evening tasks are due tomorrow.
-4. **No shame, only data.** When habits slip, respond with facts and patterns, not judgment.
+1. **The raw content stays untouched.** `## Evening` is never modified; a legacy `## Reflection` section may be read as fallback but never written.
+2. **Supported, not prescribed.** Surface patterns only when the entry or user-defined frontmatter supports them. Never require what-went-well, improvement, or gratitude content.
+3. **Tomorrow's tasks default to tomorrow.** Unlike `/process-morning` (due today), evening tasks are due tomorrow.
+4. **Habits are frontmatter-only.** Stamp `habit_evening_reflection: true` after processing non-empty human input. Do not infer, create, or update any other habit.
 5. **Batch approval for tasks.** Never create Todoist tasks without explicit user confirmation.
 6. **No silent failures.** Track every external source call. Report what succeeded, what failed, and what was skipped. See `vault-config/references/source-manifest.md`.
 
@@ -78,35 +78,30 @@ obsidian read path="5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD.md"
 
 **If it doesn't exist**: Report "No evening entry found for YYYY-MM-DD. Run `/prep-evening` first or create one manually." and stop.
 
-### Step 3: Parse Evening Habits
+### Step 3: Read Frontmatter and Stamp Completion
 
-Read the `## Evening Habits` section from the evening entry and parse **every** checkbox present — do not assume a fixed set. The evening journal template owns the habit schema; users add their own habits as checkbox lines with matching `habit_*` frontmatter properties. Map each checkbox label to its property slug (lowercase, spaces → underscores, prefixed `habit_`):
+Read every `habit_*` property already present in frontmatter. Do not parse body checkboxes and do not assume a lifestyle habit set.
 
-```markdown
-## Evening Habits
-- [x] Journaled               → habit_journaled: true
-- [ ] <Any user-added habit>  → habit_<any_user_added_habit>: false
-```
-
-**Update frontmatter** for each parsed habit (example shown for `habit_journaled`; repeat per habit found):
+Determine whether `## Evening` contains non-empty human prose, ignoring the optional comment and nested `### AI Summary` placeholder. If it is empty, leave `habit_evening_reflection: false` and stop with "No evening content to process." Defer the system-field write until Step 8 succeeds:
 
 ```python
 mcp__obsidian-mcp-tools__patch_vault_file(
     filename="5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD.md",
     operation="replace",
     targetType="frontmatter",
-    target="habit_journaled",
+    target="habit_evening_reflection",
     content="true"
 )
-# Repeat for habit_journaled
 ```
+
+All other `habit_*` fields remain untouched. Do not create a gratitude or journaling habit on the user's behalf.
 
 ### Step 4: Check Idempotency
 
-Look for an existing `## AI Summary` section in the evening entry.
+Look for an existing nested `### AI Summary` subsection in the evening entry.
 
-- If no `## AI Summary` section exists: **first run** — proceed normally
-- If it already exists: **re-run** — warn the user
+- If it is missing, empty, or contains only the `*(filled by /process-evening...)*` placeholder: **first run** — proceed normally and create/replace it once under `## Evening`
+- If it contains a substantive prior summary: **re-run** — warn the user
 
 ```
 This evening entry has already been processed. The entry has an existing AI Summary:
@@ -126,35 +121,23 @@ Also check frontmatter for `todoist_tasks_created`:
 
 ### Step 5: Extract Insights from Evening Content
 
-Read `## Evening` (voice transcript or typed) and `## Reflection` sections. Extract:
+Read the free-form content under `## Evening`. If an older entry also has `## Reflection`, read it as a legacy fallback only; never create or modify that section. Extract only what the prose supports:
 
 #### AI Summary (2-3 sentences)
-Concise summary of the evening reflection. Warm, observational tone. What happened today, how they feel, what's on their mind.
+Concise summary of the person's entry. Warm, observational tone. Cover what happened, their state when stated, and anything they want to preserve.
 
 #### Mood (single word or short phrase)
 End-of-day emotional state. Examples: "calm, satisfied", "tired but proud", "restless", "grateful".
 
-#### What Went Well
-From `## Reflection` → "What went well today:" — preserve the user's words. Lightly edit for clarity only.
+#### What Went Well (optional)
+Include only when the prose supports it. Preserve the user's words and lightly edit for clarity.
 
-#### What Could Improve
-From `## Reflection` → "What could I improve:" — frame constructively, not as failure. Keep the user's voice.
+#### What Could Improve (optional)
+Include only when the user raises an improvement or friction. Frame constructively and keep their voice.
 
-#### Gratitude (3 items — MUST be explicitly stated)
+#### Gratitude (optional)
 
-**CRITICAL**: Only include gratitude items that the person actually stated. Do NOT infer or generate gratitude from content. If not explicitly stated:
-
-```markdown
-**Grateful for**: ⚠️ No gratitude entry tonight. What are 3 things you're grateful for?
-```
-
-When gratitude IS explicitly stated:
-```markdown
-**Grateful for**:
-1. [item]
-2. [item]
-3. [item]
-```
+Include gratitude only when the person explicitly states it. Never infer it, require a count, or prompt for it. If absent, omit the field silently.
 
 #### Tomorrow Intentions
 Only if explicitly stated in the evening content ("tomorrow I want to...", "planning to..."). If not mentioned: "No specific plans mentioned."
@@ -172,7 +155,7 @@ If found: `[[Full Name]]`. If not found: plain text.
 
 This is the interactive step. Two inputs feed into one unified batch approval:
 
-1. **Still Open tasks** from `/prep-evening` (at the bottom of the entry) — cross-referenced against the evening reflection
+1. **Still Open tasks** from `/prep-evening` (at the bottom of the entry) — cross-referenced against optional evening input
 2. **New actionable items** from the evening content — same as before
 
 #### Finding Matching Task Notes
@@ -195,9 +178,9 @@ For each Still Open item, check if a corresponding task note exists:
 
 Read the `###### Still Open` section from the bottom of the evening entry. Parse each checkbox item into a task with its area, project, description, and priority.
 
-#### 6b: Cross-Reference Still Open Against Reflection
+#### 6b: Cross-Reference Still Open Against Evening Input
 
-For each Still Open task, scan the `## Evening` and `## Reflection` content for mentions or relevant context:
+For each Still Open task, scan `## Evening` and any read-only legacy `## Reflection` content for mentions or relevant context:
 
 | If the user says... | Triage action |
 |---------------------|---------------|
@@ -207,7 +190,7 @@ For each Still Open task, scan the `## Evening` and `## Reflection` content for 
 | "still need to X" / "tomorrow I'll X" | **KEEP** — no change, or update due date to tomorrow |
 | No mention of the task | **KEEP** — no change |
 
-#### 6c: Detect New Actionable Items from Reflection
+#### 6c: Detect New Actionable Items from Evening Input
 
 Scan the evening content for new actionable items not already in Still Open or Todoist:
 
@@ -215,7 +198,7 @@ Scan the evening content for new actionable items not already in Still Open or T
 |------------------------|----------------|
 | Specific next action ("need to email X", "should research Y") | **CREATE** → due tomorrow |
 | Multi-day effort ("want to start exploring Z") | **INITIATIVE** → @initiative, no due date |
-| Vague reflection ("need to be better about...") | **SKIP** → stays in journal |
+| Vague reflection ("need to be better about...") | **SKIP** → stays in the entry |
 
 #### 6d: Dedup Against Existing Todoist Tasks
 
@@ -249,7 +232,7 @@ KEEP (N — unchanged):
 └─ → [[{WorkArea}]] / [[{Project}]] — Wire Linear → Todoist sync
 
 SKIP (N — not actionable):
-└─ "I wish I could meet more people" — evening reflection, stays in journal
+└─ "I wish I could meet more people" — optional reflection, stays in the entry
 
 Apply these? [Y/n/edit]
 ```
@@ -333,7 +316,7 @@ tags:
 
 > **Project**: [[{Project Hub}]]
 
-{Context from evening reflection}
+{Context from evening input}
 
 ## Dev Log
 
@@ -406,9 +389,9 @@ mcp__obsidian-mcp-tools__patch_vault_file(
 
 After extraction, scan for patterns. This is what makes it **proactive, not passive**.
 
-#### 7a: Habit Streak Awareness
+#### 7a: Optional Frontmatter Signal Awareness
 
-Read the last 7 days of evening entries to check habit frontmatter:
+Read recent `habit_*` frontmatter only when the current entry actually contains user-defined habit fields or when the user asks for trend analysis:
 
 ```bash
 # Check recent evening entries
@@ -417,12 +400,9 @@ obsidian read path="5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD-2.m
 # ... up to 7 days back
 ```
 
-Also check morning entries for the `habit_*` frontmatter fields — read whatever `habit_*` properties the morning entry carries; the schema is owned by the journal template (`system-settings/Templates/Journal Entry Template.md`), not this skill.
+The system fields `habit_morning_brief` and `habit_evening_reflection` may be reported as workflow-completion signals. Any other habit is user-defined and may be summarized only because it already exists.
 
-Report:
-- **Current streaks**: "<Habit A>: 2 days, <Habit B>: 4 days" (use the user's actual habit labels)
-- **Broken streaks**: "<Habit> streak ended today (was 5 days)"
-- **Nudges for unchecked evening habits**: "<Habit> unchecked — still time tonight?" (use the user's actual habit labels from their entry)
+Do not nudge about false or missing lifestyle habits. Do not infer completion from prose. If no user-defined fields exist, skip lifestyle-habit analysis entirely.
 
 #### 7b: Decision-Loop Detection
 
@@ -435,9 +415,9 @@ mcp__qmd__vector_search(query="<decision topic>", collection="vault")
 If the same topic appears in 3+ recent entries, flag it:
 - "You've mentioned [topic] in N of the last M entries. Consider scheduling a focused decision session."
 
-#### 7c: Habit Slip Awareness (Sensitive — No Shame)
+#### 7c: Explicit Pattern Awareness
 
-If the user mentions slipping on a habit or breaking a streak in the evening content, respond with **data, not judgment**:
+If the user explicitly asks about a self-chosen habit or mentions a repeated pattern, respond with **data, not judgment**:
 
 - "Day 0 reset on [habit]. Previous streak: N days."
 - If enough data: "Pattern: slips tend to follow [social events / stressful work days / evenings without plans]."
@@ -453,26 +433,22 @@ Based on the morning calendar data (if available from today's `/start-day` conte
 
 ### Step 8: Write AI Summary to Evening Entry
 
-Insert `## AI Summary` section **after** the `## Reflection` section (between user content and the `---` separator before Still Open). AI Summary is post-processing output — it belongs after the raw content, not before it.
+Replace the nested `### AI Summary` subsection under `## Evening`. If an older entry lacks it, append `### AI Summary` under `## Evening` once and use replace on future runs.
 
 ```python
 mcp__obsidian-mcp-tools__patch_vault_file(
     filename="5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD.md",
-    operation="append",
+    operation="replace",
     targetType="heading",
-    target="Reflection",
+    target="AI Summary",
     content="""
-## AI Summary
 **Summary**: [2-3 sentences]
 **Mood**: [mood]
 
-**What went well**: [from reflection]
-**What could improve**: [from reflection]
+**What went well**: [only when supported]
+**What could improve**: [only when supported]
 
-**Grateful for**:
-1. [item]
-2. [item]
-3. [item]
+**Grateful for**: [only when explicitly present; otherwise omit]
 
 **People mentioned**: [[Person]]
 
@@ -483,11 +459,13 @@ mcp__obsidian-mcp-tools__patch_vault_file(
 )
 ```
 
-**Re-processing (merge behavior)**: If re-processing, use `replace` on the existing `AI Summary` heading instead of `append`.
+Omit optional fields the entry does not support. Re-processing uses the same replace operation. First-run fallback appends content beginning with `### AI Summary` to the `Evening` H2 without replacing raw prose.
+
+After the AI Summary write succeeds, set `habit_evening_reflection: true` using the frontmatter patch shown in Step 3. Never change other `habit_*` fields.
 
 ### Step 9: Add Chain Link to Evening Entry
 
-Add a forward link to tomorrow's morning. This goes between the AI Summary and the `###### Still Open` section — prepend before the Still Open heading:
+Add a forward link to tomorrow's Morning Brief before the `###### Still Open` heading:
 
 ```python
 mcp__obsidian-mcp-tools__patch_vault_file(
@@ -496,7 +474,7 @@ mcp__obsidian-mcp-tools__patch_vault_file(
     targetType="heading",
     target="Still Open",
     content="""---
-> **Next Morning**: [[5. Resources/Personal/Journal/Morning Entries/YYYY-MM-DD+1|Tomorrow's Morning]]
+> **Next Morning Brief**: [[5. Resources/Personal/Journal/Morning Entries/YYYY-MM-DD+1|Tomorrow's Morning Brief]]
 
 """
 )
@@ -509,17 +487,15 @@ Where `YYYY-MM-DD+1` is tomorrow's date. Only add if not already present (check 
 After both `/prep-evening` and `/process-evening` run, the entry looks like:
 
 ```
-(frontmatter)
-## Evening Habits                     ← template
+(frontmatter, including habit_evening_reflection)
 ### Today's Accomplishments           ← /prep-evening
 ### Tomorrow Preview                  ← /prep-evening
 ### Wind Down                         ← /prep-evening
 ---
 ## Evening                            ← user fills (voice/typed)
-## Reflection                         ← user fills
-## AI Summary                         ← /process-evening
+### AI Summary                        ← /process-evening
 ---
-> Next Morning link                   ← /process-evening
+> Next Morning Brief link             ← /process-evening
 ###### Still Open                     ← /prep-evening creates, /process-evening updates
 ```
 
@@ -532,7 +508,7 @@ Evening processed for YYYY-MM-DD.
 
 **Summary**: [2-3 sentences]
 **Mood**: [mood]
-**Habits**: N/M evening habits | Streaks: [<habit> Xd, ...]
+**Habits**: Evening Entry processed; list other user-defined fields only when present
 **Task triage**: N closed, N deferred, N kept | N new tasks created for tomorrow
 **Patterns**: [any flags from Step 7]
 
@@ -541,7 +517,7 @@ Evening entry updated: [[5. Resources/Personal/Journal/Evening Entries/YYYY-MM-D
 ---
 ### Execution Report
 #### Sources
-- [x] Obsidian CLI — evening entry read, N historical entries for streaks
+- [x] Obsidian CLI — Evening Entry read; historical entries read only when relevant
 - [x] Obsidian MCP — frontmatter updated, AI Summary written, Still Open updated
 - [x] QMD Search — pattern detection, N entries scanned
 - [x] Todoist — N tasks triaged (M closed, K deferred, J created)
@@ -562,20 +538,20 @@ Only include Warnings and Fix sections if there are actual issues.
 | No evening entry for date | Report and stop — suggest running `/prep-evening` first |
 | Already processed (AI Summary exists) | Warn and ask. On confirm: replace summary/mood, merge content |
 | Evening section is empty | Report "No evening content to process" and stop |
-| No reflection section | Extract from `## Evening` only, note that reflection wasn't completed |
-| No explicit gratitude | Write "⚠️ No gratitude entry tonight" — never fabricate |
+| Legacy `## Reflection` section | Read as fallback only; never write it |
+| No explicit gratitude | Omit gratitude silently — never fabricate or prompt |
 | No actionable items and no Still Open | Skip triage — "No task changes" |
 | Still Open section empty or missing | Skip triage of existing tasks, still propose new ones from reflection |
-| Recent entries unavailable for streak calc | Report streaks based on available data, note gaps |
-| Habit slip detected | Data only, no judgment. Report streak reset and pattern if available |
+| Recent entries unavailable for requested trend | Report only what available frontmatter supports and note gaps |
+| User asks about a self-chosen habit | Data only, no judgment; never infer completion |
 | Re-run with tasks already created | Skip Step 6 unless user requests re-creation |
 
 ## What This Skill Does NOT Do
 
-- Does not modify raw content (`## Evening`, `## Reflection` content stays untouched)
+- Does not modify raw content (`## Evening`; legacy `## Reflection` also stays untouched)
 - Does not create tasks without approval (batch approval pattern)
-- Does not process the morning journal (that's `/process-journal`)
+- Does not process the Morning Brief (that's `/process-morning`)
 - Does not show personal content on the daily hub
-- Does not track streaks itself — reads historical frontmatter data to calculate
+- Does not create lifestyle habits or expose them in the note body
 - Does not prep the evening page (that's `/prep-evening`)
 - Does not create the evening entry if missing (that's `/prep-evening`)

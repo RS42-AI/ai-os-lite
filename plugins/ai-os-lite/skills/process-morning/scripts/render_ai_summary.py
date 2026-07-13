@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render the private `### AI Summary` body for /process-journal v3.
+"""Render the private Morning Brief `### AI Summary` body.
 
 Kept deliberately generic: the paragraph shape (work signal, then an optional
 emotional/gratitude/routing follow-up) is deterministic, but the wording never

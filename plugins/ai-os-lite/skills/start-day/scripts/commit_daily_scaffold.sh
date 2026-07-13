@@ -1,6 +1,6 @@
 #!/bin/bash
 # commit_daily_scaffold.sh — Commits the day's populated scaffold (daily hub +
-# morning journal entry) in the vault git repo so the morning-entry edits that
+# Morning Brief) in the vault git repo so later optional edits that
 # follow are visible as a distinct modification in git history.
 # Called by /start-day as Step 5b, after the journal page is fully rendered.
 # Usage: commit_daily_scaffold.sh YYYY-MM-DD [VAULT_PATH]

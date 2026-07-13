@@ -1,6 +1,6 @@
 ---
 name: start-day
-description: Morning prep that writes a daily cockpit into the journal page before you record: Overall Read, Movement, candidate Control Queue, Threads To Keep Visible, and At Risk. Creates the context that makes voice journal entries specific and actionable. Use when the user says "start day", "morning prep", or "/start-day".
+description: Prepare an executive Morning Brief on schedule: Overall Read, Movement, candidate Control Queue, Threads To Keep Visible, and At Risk. The brief stays useful whether or not the user adds optional voice or written context. Use when the user says "start day", "morning brief", "morning prep", or "/start-day".
 user-invocable: true
 allowed-tools:
   # Gather script (deterministic context collection)
@@ -18,23 +18,23 @@ allowed-tools:
   - mcp__obsidian-mcp-tools__patch_vault_file
   # QMD Search (backup devlog discovery)
   - mcp__qmd__search
-  # Linear MCP (RS42 issues — can't be scripted)
+  # Linear MCP (configured workspace issues — can't be scripted)
   - mcp__linear__list_issues
 ---
 
 # Start Day
 
-Prep today's journal page with yesterday's context — devlogs, carry-forward tasks, calendar, and evening reflection. This is Phase A of the daily loop: **AI preps the meeting before you journal.**
+Prepare today's Morning Brief with yesterday's context — devlogs, carry-forward tasks, calendar, and any available Evening Entry. This is Phase A of the daily loop: **the AI arrives prepared before the user starts work.**
 
 ## Key Principles
 
-1. **Write to the journal page only** — the recap and full briefing go to the morning entry. Today's priorities go to the daily hub only after /process-journal processes the morning reflection.
+1. **Write to the Morning Brief page only** — the recap and full briefing go to the morning entry. Today's committed plan goes to the daily hub after `/process-morning` processes any optional human context.
 2. **Recap window = days with captured work** — the gather script walks back through tiers (3 → 5 → 7 days) until it finds the most recent surfaceable content. The window covers `[from..today]`, with empty days between gaps rendered as a one-liner.
 3. **Keep it scannable** — short bullets, not paragraphs. Group by project, not by file.
-4. **Don't duplicate /process-journal** — this skill preps, it does not extract or create tasks.
+4. **Don't duplicate /process-morning** — this skill preps, it does not extract or create tasks.
 5. **No silent failures** — track every source call, report what succeeded/failed/skipped. See `vault-config/references/source-manifest.md`.
 6. **Task visibility via Bases queries** — the journal template's `## Tasks Overview` queries render tasks from `type: task` frontmatter. This skill does not write task lists.
-7. **No task note creation** — `/process-journal` owns task note creation after the morning meeting.
+7. **No task note creation** — `/process-morning` owns task note creation after the Morning Brief.
 8. **Privacy is respected without prompting** — files in private projects (project hub has `private: true`) are silently excluded. The gather script also stamps `private: true` directly into excluded files' frontmatter as a one-way durable marker so future tools see the flag without re-traversing the project hub.
 
 ## Sources
@@ -43,19 +43,19 @@ Track all source calls per `vault-config/references/source-manifest.md`. The gat
 
 | Source | Used For | Criticality |
 |--------|---------|-------------|
-| Obsidian CLI | Read/write journal, daily hub, devlogs | REQUIRED |
-| Obsidian MCP | Patch sections into journal + hub | REQUIRED |
+| Obsidian CLI | Read/write Morning Brief, daily hub, devlogs | REQUIRED |
+| Obsidian MCP | Patch sections into Morning Brief + hub | REQUIRED |
 | QMD Search | Devlog lookup (backup to glob) | MEDIUM |
 | Todoist CLI | Today's tasks, carry-forward, Linear sync | HIGH |
 | GWS Calendar | Today's calendar events | MEDIUM |
-| Linear MCP | RS42 issues → Todoist sync | MEDIUM |
+| Linear MCP | Configured Linear issues → Todoist sync | MEDIUM |
 | Task Notes | Task note frontmatter (all projects) | MEDIUM |
 | Vault git | Scaffold snapshot commit (Step 5b) | MEDIUM |
 
 ## Invocation
 
 ```
-/start-day              → prep today's journal page
+/start-day              → prep today's Morning Brief
 /start-day 2026-03-15   → prep a specific date
 ```
 
@@ -101,13 +101,13 @@ chmod +x ${CLAUDE_PLUGIN_ROOT}/skills/start-day/scripts/gather_morning_context.s
 
 The gather script can't call MCP tools. Fill in the gaps:
 
-### Linear Issues (RS42)
+### Linear Issues (when configured)
 
 ```
 mcp__linear__list_issues(assignee="me", state="In Progress")
 ```
 
-Record failure and continue if unavailable. Add `- [ ] Linear in-progress — FAILED: {error}` to the execution report.
+Use the vault's `AGENTS.md` Cross-System Identity mapping to scope the workspace/team when one is configured. If no mapping exists, skip this source. Record failure and continue if unavailable.
 
 ### Backup Search (only if recap window is unexpectedly empty)
 
@@ -172,15 +172,15 @@ Optional model synthesis is allowed only inside short prose sentences:
 
 Do not change the section order, remove source warnings, invent meetings, or invent tasks. Meeting Prep must come from `meetings_today`; Review/Decide/Dispatch candidates must come from `task_notes`, `meetings_today`, or `source_manifest`. Area order and area-hub wikilinks come from `areas` (see Step 1) — never hardcode an area list or wikilink target.
 
-Patch the rendered block into the morning journal by replacing the existing cockpit region from `### Overall Read` through `#### At Risk`. If the journal still has the legacy `## Recent Accomplishments` scaffold, replace that legacy block with the v3 cockpit block.
+Patch the rendered block into the Morning Brief by replacing the existing cockpit region from `### Overall Read` through `#### At Risk`. If an older entry still has the legacy `## Recent Accomplishments` scaffold, replace that legacy block with the v3 cockpit block.
 
-`/start-day` still does **not** write the daily hub. `/process-journal` owns the daily hub after the morning entry exists.
+`/start-day` still does **not** write the daily hub. `/process-morning` owns the daily hub after the morning entry exists.
 
 ### 4-legacy: Historical Render Notes (do not use for current v3 runs)
 
 Read `references/context-format.md` for exact formatting rules.
 
-`/start-day` writes **one atomic patch** into the morning journal entry — the entire `## Recent Accomplishments` block (containing the three operational subsections + the `### Last Night's Reflection` subsection) is replaced in a single MCP call. All task visibility comes from the `## Tasks Overview` Bases queries the template already provides; this skill does not write task lists.
+`/start-day` writes **one atomic patch** into the Morning Brief — the entire legacy `## Recent Accomplishments` block (containing the three operational subsections + the `### Last Night's Reflection` subsection) is replaced in a single MCP call. All task visibility comes from the `## Tasks Overview` Bases queries the template already provides; this skill does not write task lists.
 
 > **Why one atomic patch.** Earlier iterations made two patch calls (one for Recent Accomplishments, a separate one for Last Night's Reflection). On re-runs after the first section had reflowed text, the second patch sometimes failed to find its H3 target and appended a duplicate H1 at the bottom of the file. Folding Last Night's Reflection into the Recent Accomplishments payload eliminates that drift. See Start-Day Iteration Findings 5-15 §5.
 
@@ -213,7 +213,7 @@ Per-subsection secondary keys:
 - **What Changed Structurally**: within an area, no specific secondary order (typically one bullet per area).
 - **Needs Attention**: within each band, sort by `area_priority_rank` ascending; secondary sort is `days_silent` ascending in Warm (freshest first), `days_silent` descending in Cold (longest-silent first).
 
-**Area priority outranks the secondary key.** Example: a 38-days-silent {SideArea} project sorts *below* a 34-days-silent {SideArea2} project, because {SideArea2} (rank 2) outranks {SideArea} (rank 3). See spec delta 5 worked example in `Start-Day Morning Journal Render — Target Shape Spec from 5-13 Iteration.md §5`.
+**Area priority outranks the secondary key.** Example: a 38-days-silent {SideArea} project sorts *below* a 34-days-silent {SideArea2} project, because {SideArea2} (rank 2) outranks {SideArea} (rank 3). Preserve the configured area rank before applying recency as the secondary key.
 
 ### What Moved Forward
 
@@ -303,7 +303,7 @@ The `{reason}` comes from the gather output's `reason` field on cold entries (ei
 
 **Carry-forward context (optional, non-mechanical):**
 
-For each entry rendered, check the prior morning journal (`5. Resources/Personal/Journal/Morning Entries/<yesterday>.md`)'s Needs Attention section. If the same `slug` appears there, copy any trailing prose annotation (e.g. "Load-bearing blocker for…", "{Contact} pricing follow-up still owed", "⚠ Hub `Current Status` empty — `/project-sync` overdue") onto today's entry. This is best-effort prose carry — if the annotation references a specific date or event that's stale (e.g. "today's `Teach sister` onboarding" the day after that event), drop or update it. Annotations are not derivable from gather data alone; absent a prior-journal source, omit them.
+For each entry rendered, check the prior Morning Brief (`5. Resources/Personal/Journal/Morning Entries/<yesterday>.md`)'s Needs Attention section. If the same `slug` appears there, copy any trailing prose annotation. This is best-effort prose carry; drop or update stale date-specific annotations. Without a prior-Brief source, omit them.
 
 **Omission rule:**
 
@@ -336,7 +336,7 @@ Append the `### Last Night's Reflection` subsection as the **last** H3 inside th
 
 - `YYYY-MM-DD` is yesterday's date — `dates.yesterday` from the gather output.
 - Source for the populated Key insight: `evening.content`.
-- The empty-state sentinel `NO EVENING ENTRY` is in literal caps — easy to grep, impossible to skim past. The `Key insight:` line stays present with empty value so the slot is structurally identical to the populated shape. **Do not render** `> *No evening reflection from last night*` — that soft form is deprecated.
+- The empty-state sentinel `NO EVENING ENTRY` is in literal caps — easy to grep, impossible to skim past. The `Key insight:` line stays present with empty value so the slot is structurally identical to the populated shape. Do not render a personal-reflection prompt in its place.
 - **Only the Key insight is retained.** Drop Mood and Gratitude — both are one click away via the Previous Evening link.
 
 ### 4c: Link Resolver Rules — applies to every wikilink in the payload
@@ -419,7 +419,7 @@ If any link fails, **do not report success** in Step 6. Surface the failed links
 
 ### 4f: Daily hub
 
-`/start-day` does NOT write to the daily hub. The daily hub's `**Today's priorities:**` placeholder (`- [ ] ...`) stays until `/process-journal` fills it after the morning meeting.
+`/start-day` does NOT write to the daily hub. The daily hub's `## Morning Brief` placeholder stays until `/process-morning` fills it after optional human input.
 
 Do not touch the daily hub file in Step 4.
 
@@ -539,18 +539,18 @@ td task add "Verb-first description (Linear RS4-xxx)" --project "{SideArea2}" --
 
 ## Step 5b: Commit the Daily Scaffold
 
-Snapshot the day's starting state in the vault git repo so the morning-entry recording that follows shows up as a distinct modification in git history (`/vault-commit`'s nightly pass would otherwise fold scaffold and morning entry into one commit):
+Snapshot the day's starting state in the vault git repo so later Morning Brief input shows up as a distinct modification in git history (`/vault-commit` would otherwise fold scaffold and input into one commit):
 
 ```bash
 bash ${CLAUDE_PLUGIN_ROOT}/skills/start-day/scripts/commit_daily_scaffold.sh TARGET_DATE
 ```
 
-The script commits **only** the daily hub (`1. Daily/TARGET_DATE.md`) and the morning journal entry (`5. Resources/Personal/Journal/Morning Entries/TARGET_DATE.md`) with the message `chore: start-day scaffold for TARGET_DATE`. Everything else dirty in the vault (private stamps, orphan-cluster devlogs from 4g, unrelated edits) is left for `/vault-commit`.
+The script commits **only** the daily hub (`1. Daily/TARGET_DATE.md`) and the Morning Brief (`5. Resources/Personal/Journal/Morning Entries/TARGET_DATE.md`) with the message `chore: start-day scaffold for TARGET_DATE`. Everything else dirty in the vault is left for `/vault-commit`.
 
 Parse the JSON output:
 - `{committed: true, sha, ...}` — report the commit in Step 6's execution report.
 - `{committed: false, reason: "no_changes"}` — re-run with nothing new; report as skipped, not a failure.
-- `{committed: false, error: "..."}` — the commit failed. **Warn, don't abort**: continue to Step 6 and surface the error in the Warnings section. The journal page is already prepped; a missed snapshot must not block the morning meeting.
+- `{committed: false, error: "..."}` — the commit failed. **Warn, don't abort**: continue to Step 6 and surface the error in the Warnings section. The Morning Brief is already prepared; a missed snapshot must not block the workflow.
 
 ## Step 6: Report Results
 
@@ -562,13 +562,13 @@ Morning prep complete for YYYY-MM-DD.
 **Yesterday**: N devlog sessions
 **Carry-forward**: N tasks (M overdue)
 
-Journal page prepped → [[5. Resources/Personal/Journal/Morning Entries/YYYY-MM-DD]]
-Ready to record your morning journal.
+Morning Brief prepared → [[5. Resources/Personal/Journal/Morning Entries/YYYY-MM-DD]]
+Review it when you begin work; add voice or written context only if useful.
 
 ---
 ### Execution Report
 #### Sources
-- [x] Obsidian CLI — journal read, daily hub read, N devlogs found
+- [x] Obsidian CLI — Morning Brief read, daily hub read, N devlogs found
 - [x] Todoist overdue/today — N items
 - [ ] GWS Calendar — FAILED: auth token expired
 - [x] Linear in-progress — N items
@@ -600,17 +600,17 @@ Only include Warnings and Fix sections if there are actual issues. Script-tracke
 | Private project files | Silently excluded by gather script + per-file `private: true` stamp written to file frontmatter (one-way) |
 | No Todoist tasks | "No overdue tasks" |
 | Linear unavailable | Continue — note in source manifest |
-| Journal already has context | Replace existing context (re-run safe) |
+| Morning Brief already has context | Replace existing prepared context (re-run safe) |
 | Re-run with no scaffold changes since last commit | Step 5b skips with `reason: no_changes` — no duplicate commit |
 | Re-run that changed the rendered context | Step 5b commits a fresh snapshot (same message) — legitimate, not a duplicate |
-| Scaffold commit fails (merge in progress, locked index) | Warn in execution report, do not abort — journal page is already prepped |
+| Scaffold commit fails (merge in progress, locked index) | Warn in execution report, do not abort — Morning Brief is already prepared |
 
 ## What This Skill Does NOT Do
 
-- Extract priorities from journal transcript (that's `/process-journal`)
-- Create Todoist tasks from journal content (that's `/process-journal`)
+- Extract priorities from optional Morning Brief input (that's `/process-morning`)
+- Create Todoist tasks from Morning Brief input (that's `/process-morning`)
 - Process voice transcripts
 - Complete Linear items (reads state, mirrors to Todoist)
-- Does not write task lists to the journal or daily hub (Bases queries in the template render tasks from `type: task` frontmatter)
-- Does not create task notes (that's `/process-journal`)
-- Does not commit anything beyond the day's scaffold (hub + morning journal) — `/vault-commit` owns all other commits
+- Does not write task lists to the Morning Brief or daily hub (Bases queries render tasks from frontmatter)
+- Does not create task notes (that's `/process-morning`)
+- Does not commit anything beyond the day's scaffold (hub + Morning Brief) — `/vault-commit` owns all other commits

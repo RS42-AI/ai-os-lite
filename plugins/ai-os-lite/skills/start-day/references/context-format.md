@@ -5,7 +5,7 @@ Read this file when interpreting gathered data from `gather_morning_context.sh`.
 
 ## Journal Page Context
 
-`/start-day` writes **only two sections** into the morning journal entry, replacing placeholders via MCP `patch_vault_file` with `operation="replace"`, `targetType="heading"`.
+`/start-day` writes **only two sections** into the Morning Brief, replacing placeholders via MCP `patch_vault_file` with `operation="replace"`, `targetType="heading"`.
 
 ### Recent Accomplishments
 
@@ -35,8 +35,8 @@ A single blockquote containing the Previous Evening link and one Key insight lin
 
 Rules:
 - `YYYY-MM-DD` is yesterday's date — from `dates.yesterday` in the gather output.
-- The Key insight is one sentence distilled from `evening.content` (last night's evening entry AI Summary).
-- **Only the Key insight is retained.** Mood and Gratitude are deliberately dropped — both are one click away via the Previous Evening link.
+- The Key insight is one sentence distilled from `evening.content` (last night's Evening Entry AI Summary when available).
+- **Only the Key insight is retained.** Personal reflection details remain one click away via the Previous Evening link and are not copied into the Morning Brief.
 - The empty-state sentinel `NO EVENING ENTRY` is in literal caps — easy to grep, impossible to skim past. The `Key insight:` line stays present with empty value so the slot is structurally identical to the populated shape.
 
 ### Task Visibility (NOT written by /start-day)
@@ -45,7 +45,7 @@ Tasks are rendered by the `## Tasks Overview` section's Bases queries in the tem
 
 ## Daily Hub Sections
 
-`/start-day` does not write to the daily hub. The `**Today's priorities:**` placeholder stays as `- [ ] ...` until `/process-journal` fills it after the morning meeting.
+`/start-day` does not write to the daily hub. The `## Morning Brief` placeholder remains until `/process-morning` fills it after optional human input.
 
 ## Area-to-Wikilink Mapping
 

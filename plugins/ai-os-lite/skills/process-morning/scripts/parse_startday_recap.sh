@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Parse the Recent Accomplishments / Needs Attention section that /start-day
-# wrote into today's morning journal entry. Emit a JSON list of warm + cold
-# project slugs with annotations for /process-journal to cross-reference.
+# wrote into today's Morning Brief. Emit a JSON list of warm + cold
+# project slugs with annotations for /process-morning to cross-reference.
 # Usage: parse_startday_recap.sh YYYY-MM-DD
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"

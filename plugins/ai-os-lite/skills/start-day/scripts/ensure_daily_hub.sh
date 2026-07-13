@@ -60,9 +60,9 @@ tags:
 > [[1. Daily/${PREV_DATE}|← Yesterday]] | [[1. Daily/${NEXT_DATE}|Tomorrow →]]
 
 ---
-## Morning Journal
+## Morning Brief
 
-> [[5. Resources/Personal/Journal/Morning Entries/${TARGET_DATE}|Open Morning Entry]]
+> [[5. Resources/Personal/Journal/Morning Entries/${TARGET_DATE}|Open Morning Brief]]
 
 
 **Today's priorities:**
@@ -141,6 +141,7 @@ views:
 ---
 ## Notes Created Today
 
+%% To exclude an area from this view, add a line: - area != "<slug>" %%
 \`\`\`base
 filters:
   and:
@@ -150,8 +151,6 @@ filters:
     - type != "daily"
     - type != "journal"
     - type != "task"
-    - area != "personal"
-    - area != "health"
 views:
   - type: table
     name: Notes
@@ -169,7 +168,7 @@ views:
 \`\`\`
 
 ---
-## Evening Reflection
+## Evening
 
 > [[5. Resources/Personal/Journal/Evening Entries/${TARGET_DATE}|Open Evening Entry]]
 TEMPLATE

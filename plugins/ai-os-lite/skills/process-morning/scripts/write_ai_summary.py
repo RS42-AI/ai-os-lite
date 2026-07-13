@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Replace the morning journal's `### AI Summary` body from a v3 context JSON."""
+"""Replace the Morning Brief's `### AI Summary` body and stamp completion."""
 
 from __future__ import annotations
 
@@ -22,6 +22,24 @@ def replace_ai_summary(text: str, content: str) -> str:
     return text[: match.start()] + replacement + text[match.end() :]
 
 
+def upsert_frontmatter_bool(text: str, key: str, value: bool) -> str:
+    """Set a boolean in the first YAML frontmatter block without touching the body."""
+    frontmatter = re.compile(r"\A---\n(?P<body>.*?)\n---(?P<tail>\n|\Z)", flags=re.S)
+    match = frontmatter.search(text)
+    if not match:
+        raise ValueError("YAML frontmatter not found")
+
+    rendered = "true" if value else "false"
+    body = match.group("body")
+    field = re.compile(rf"^{re.escape(key)}\s*:\s*.*$", flags=re.M)
+    if field.search(body):
+        body = field.sub(f"{key}: {rendered}", body, count=1)
+    else:
+        body = f"{body}\n{key}: {rendered}"
+
+    return text[: match.start("body")] + body + text[match.end("body") :]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("json", help="daily plan context JSON file")
@@ -36,6 +54,7 @@ def main() -> None:
     path = Path(args.vault) / journal_rel
     text = path.read_text(encoding="utf-8")
     updated = replace_ai_summary(text, render(context))
+    updated = upsert_frontmatter_bool(updated, "habit_morning_brief", True)
     path.write_text(updated, encoding="utf-8")
     print(journal_rel)
 

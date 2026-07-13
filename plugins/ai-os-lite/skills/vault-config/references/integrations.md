@@ -86,17 +86,12 @@ PRIMARY:    Obsidian Journal + Daily Notes
 
 | Area | Primary Sources | Context Sources |
 |------|----------------|-----------------|
-| `{workarea-slug}` | Granola | Obsidian |
-| `{sidearea2-slug}` | Linear, GitHub | Obsidian |
-| `personal-finance` | Obsidian | — |
-| `health` | Obsidian | — |
-| `{sidearea-slug}` | Obsidian | — |
-| `personal` | Obsidian Journal | — |
+| `{area-slug}` | Sources configured for that area | Obsidian |
+| `{linear-area-slug}` | Linear, GitHub (when mapped) | Obsidian |
 
 ## Linear Workspace
 
 ### Teams
 | Team | Purpose |
 |------|---------|
-| RS42 | Internal projects, plugins, tools |
-| {WorkArea} | Client work tracking (personal reflection) |
+| `{LinearTeam}` | Purpose recorded in the vault's `AGENTS.md` |

@@ -13,7 +13,7 @@ allowed-tools:
   # Obsidian MCP (hub patching + task note creation)
   - mcp__obsidian-mcp-tools__patch_vault_file
   - mcp__obsidian-mcp-tools__create_vault_file
-  # Linear MCP (RS42 issues)
+  # Linear MCP (configured workspace issues)
   - mcp__linear__list_issues
   # QMD (cross-project search fallback)
   - mcp__qmd__search
@@ -45,7 +45,7 @@ Track all source calls per `vault-config/references/source-manifest.md`. The gat
 | 3 | Knowledge notes (via script) | Resolution/Update section headings | MEDIUM |
 | 4 | Hub Current Status (via script) | Current state text | REQUIRED |
 | 5 | Cross-project devlogs (via script) | Mentions of this project in other Dev Log folders | MEDIUM |
-| — | Linear MCP (you call this) | RS42 issue status | MEDIUM |
+| — | Linear MCP (you call this) | Configured Linear issue status | MEDIUM |
 | — | Link traversal (you do this) | Follow wikilinks from tasks/knowledge notes | MEDIUM |
 | — | Obsidian MCP | Patch hub + create task notes | REQUIRED |
 
@@ -98,15 +98,15 @@ chmod +x ${CLAUDE_PLUGIN_ROOT}/skills/project-sync/scripts/gather_project_contex
 
 The gather script cannot call MCP tools or follow wikilinks. Fill in those gaps now.
 
-### 2a: Linear Issues (RS42 projects only)
+### 2a: Linear Issues (configured projects only)
 
-If `project.area` is `rs42`:
+Read the vault's `AGENTS.md` Cross-System Identity mapping. If the project has a Linear workspace/team or project mapping, query it:
 
 ```python
 mcp__linear__list_issues(project="{project_name}", assignee="me")
 ```
 
-Record failure and continue if unavailable. Add `- [ ] Linear — FAILED: {error}` to the execution report.
+If the project has no Linear mapping, skip this source without error. Record failures and continue if configured but unavailable.
 
 ### 2b: Link Traversal
 
@@ -369,7 +369,7 @@ Hub: [[{hub_path}]]
 
 #### Sources
 - [x] Gather script — hub status, N task notes, N devlogs, N knowledge notes, N cross-project refs
-- [x] Linear — N issues (or skipped: not RS42 / FAILED: error)
+- [x] Linear — N issues (or skipped: not configured / FAILED: error)
 - [x] Link traversal — N notes read
 - [x] Obsidian MCP — hub patched, N task notes updated, N task notes created
 

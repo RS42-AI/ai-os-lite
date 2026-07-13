@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Shared helpers for /process-journal scripts.
+# Shared helpers for /process-morning scripts.
 # Source from any sibling script: `source "$(dirname "$0")/lib.sh"`
 
 VAULT="${VAULT:-$HOME/Claude/ObsidianVault}"

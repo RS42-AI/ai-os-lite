@@ -1,6 +1,6 @@
 # AI-OS Lite
 
-**An AI Personal Operating System** — a [Claude Code](https://docs.claude.com/en/docs/claude-code) plugin that turns an [Obsidian](https://obsidian.md) vault into an AI-operated daily workflow: morning briefings, voice-journal processing, evening reflection, task orchestration, and project status — all driven by your own notes.
+**An AI operating system for focused human-agent work** — a [Claude Code](https://docs.claude.com/en/docs/claude-code) plugin that turns an [Obsidian](https://obsidian.md) vault into an AI-operated daily workflow: scheduled Morning Briefs, optional free-form input, task orchestration, evening preparation, and project status — all grounded in your own notes.
 
 AI-OS Lite reads and writes your vault, syncs work items to [Todoist](https://todoist.com) and [Linear](https://linear.app), and keeps your daily/project hubs current. It's the engine behind a frontmatter-routed, AI-navigable knowledge system.
 
@@ -12,10 +12,10 @@ Eight skills, invoked by natural language or slash commands:
 
 | Skill | What it does |
 |-------|-------------|
-| `start-day` | Morning prep — writes a "Yesterday" recap + today's context to your journal before you record |
-| `process-journal` | Processes a morning journal entry — extracts summary, mood, priorities, people; pushes priorities to Todoist |
-| `prep-evening` | Evening prep — writes the day's accomplishments and a wind-down prompt |
-| `process-evening` | Processes an evening entry — mood, habits, gratitude, tomorrow's tasks, pattern detection |
+| `start-day` | Prepares an executive Morning Brief from recent work, current tasks, meetings, risks, and open decisions |
+| `process-morning` | Processes optional Morning Brief input into a private summary, committed daily plan, and approved task actions |
+| `prep-evening` | Prepares an optional Evening Entry with accomplishments, tomorrow preview, wind-down, and Still Open work |
+| `process-evening` | Processes optional free-form evening input; gratitude and personal habits are never required |
 | `project-sync` | Refreshes a project hub's status from recent devlogs, notes, and Linear |
 | `vault-commit` | Groups uncommitted vault changes into clean semantic git commits |
 | `vault-audit` | Deterministic conformance audit of your vault's structure against its own `AGENTS.md` contract |
@@ -41,7 +41,7 @@ Then configure your vault path and conventions in your vault's `AGENTS.md`. The 
 
 ## Configuration
 
-AI-OS Lite is **per-user generic by design**. It contains no hardcoded names, employers, or projects — every example uses a `{Placeholder}` token that the model fills from your `AGENTS.md` at output time:
+AI-OS Lite is **per-user generic by design**. It contains no hardcoded names, employers, projects, gratitude routines, or lifestyle habits. Examples use `{Placeholder}` tokens that the model fills from your `AGENTS.md` at output time:
 
 - `{WorkArea}` / `{SideArea}` → your areas
 - `{Project}` → your projects (read from your vault filesystem)

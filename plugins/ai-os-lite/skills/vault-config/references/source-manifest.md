@@ -39,18 +39,18 @@ The skill still **does not block** on non-REQUIRED failures — it degrades grac
 
 | Source | Used For | Criticality |
 |--------|---------|-------------|
-| Obsidian CLI | Read/write journal, daily hub, devlogs | REQUIRED |
-| Obsidian MCP | Patch sections into journal + hub | REQUIRED |
+| Obsidian CLI | Read/write Morning Brief, daily hub, devlogs | REQUIRED |
+| Obsidian MCP | Patch sections into Morning Brief + hub | REQUIRED |
 | QMD Search | Devlog lookup (backup to glob) | MEDIUM |
 | Todoist CLI | Today's tasks, carry-forward, Linear sync | HIGH |
 | GWS Calendar | Today's calendar events | MEDIUM |
-| Linear MCP | RS42 issues → Todoist sync | MEDIUM |
+| Linear MCP | Configured Linear issues → Todoist sync | MEDIUM |
 
-### /process-journal
+### /process-morning
 
 | Source | Used For | Criticality |
 |--------|---------|-------------|
-| Obsidian CLI | Read journal transcript, write AI Summary | REQUIRED |
+| Obsidian CLI | Read Morning Brief input, write AI Summary | REQUIRED |
 | Obsidian MCP | Patch sections, update frontmatter | REQUIRED |
 | QMD Search | People lookup in vault contacts | LOW |
 | Todoist CLI | Task creation, dedup check | HIGH |
@@ -64,7 +64,7 @@ The skill still **does not block** on non-REQUIRED failures — it degrades grac
 | QMD Search | Devlog lookup (backup to glob) | MEDIUM |
 | Todoist CLI | Completed tasks, remaining tasks | HIGH |
 | GWS Calendar | Tomorrow preview | MEDIUM |
-| Linear MCP | Cross-reference devlogs against RS42 issues | LOW |
+| Linear MCP | Cross-reference devlogs against configured Linear issues | LOW |
 
 ### /process-evening
 

@@ -76,7 +76,7 @@ mcp__linear__list_teams()
 ### List Available Statuses
 ```python
 mcp__linear__list_issue_statuses(
-    team="RS42"
+    team="{LinearTeam}"
 )
 ```
 
@@ -86,7 +86,7 @@ mcp__linear__list_issue_statuses(
 ```python
 # After user approval
 mcp__linear__save_issue(
-    id="RS4-123",
+    id="{TICKET}-123",
     state="Done"
 )
 ```
@@ -95,8 +95,8 @@ mcp__linear__save_issue(
 ```python
 # After user approval
 mcp__linear__save_issue(
-    team="RS42",
-    title="Implement process-journal skill",
+    team="{LinearTeam}",
+    title="Implement process-morning skill",
     project="{Project}",
     description="Details...",
     priority=2,
@@ -108,7 +108,7 @@ mcp__linear__save_issue(
 ```python
 # After user approval
 mcp__linear__create_comment(
-    issueId="RS4-123",
+    issueId="{TICKET}-123",
     body="Status update: completed initial implementation."
 )
 ```
@@ -117,8 +117,7 @@ mcp__linear__create_comment(
 
 | Team | Purpose |
 |------|---------|
-| RS42 | Internal projects, plugins, tools |
-| {WorkArea} | Client work (personal tracking only) |
+| `{LinearTeam}` | Projects mapped in the vault's `AGENTS.md` |
 
 ## Best Practices
 

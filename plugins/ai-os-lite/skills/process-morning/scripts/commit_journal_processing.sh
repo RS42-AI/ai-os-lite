@@ -4,7 +4,7 @@
 # and any task notes created in Step 7) in the vault git repo so the
 # processing run is a distinct, legible git step — separate from the /start-day
 # scaffold snapshot and the nightly /vault-commit sweep.
-# Called by /process-journal as Step 8j, after all writes complete (Steps 6, 7,
+# Called by /process-morning as Step 8j, after all writes complete (Steps 6, 7,
 # 8a-8i).
 # Usage: commit_journal_processing.sh YYYY-MM-DD [VAULT_PATH] [TASK_NOTE_PATH...]
 #
@@ -27,7 +27,7 @@
 # Summary, priorities, or bottom marker commits again (a legitimate new snapshot,
 # same message).
 #
-# Failure semantics: always exits 0 (warn, don't block process-journal). A
+# Failure semantics: always exits 0 (warn, don't block process-morning). A
 # failed commit surfaces as {committed: false, error: "..."} for the execution
 # report. Usage errors (missing date arg) are the only non-zero exit.
 #
@@ -46,7 +46,7 @@ fi
 
 JOURNAL_REL="5. Resources/Personal/Journal/Morning Entries/${TARGET_DATE}.md"
 HUB_REL="1. Daily/${TARGET_DATE}.md"
-COMMIT_MSG="docs: process-journal for ${TARGET_DATE}"
+COMMIT_MSG="docs: process-morning for ${TARGET_DATE}"
 
 # emit committed sha message files_json reason error — single JSON exit point
 emit() {

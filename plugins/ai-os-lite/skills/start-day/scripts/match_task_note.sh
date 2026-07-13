@@ -1,6 +1,6 @@
 #!/bin/bash
 # match_task_note.sh — Find task notes whose content matches search terms.
-# Used by /process-journal to cross-reference priorities with existing task notes.
+# Used by /process-morning to cross-reference priorities with existing task notes.
 # Usage: match_task_note.sh "search term" [VAULT_PATH]
 #
 # VAULT_PATH resolution (first match wins):

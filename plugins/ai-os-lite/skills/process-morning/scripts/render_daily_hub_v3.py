@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render the /process-journal v3 daily hub block from gathered context."""
+"""Render the /process-morning Morning Brief block from gathered context."""
 
 from __future__ import annotations
 
@@ -225,7 +225,7 @@ def render_routing_exceptions(context: dict[str, Any]) -> list[str]:
 
 def render(context: dict[str, Any]) -> str:
     journal_path = context.get("files", {}).get("journal_path", "")
-    journal_link = f"> [[{journal_path[:-3]}|Open Morning Entry]]" if journal_path.endswith(".md") else "> [[Open Morning Entry]]"
+    journal_link = f"> [[{journal_path[:-3]}|Open Morning Brief]]" if journal_path.endswith(".md") else "> [[Open Morning Brief]]"
     anchor_title, anchor_start = choose_work_anchor(context)
 
     lines = [

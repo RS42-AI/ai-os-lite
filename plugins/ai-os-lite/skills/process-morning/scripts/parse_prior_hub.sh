@@ -12,7 +12,7 @@ if [[ ! -f "$hub_path" ]]; then
   exit 0
 fi
 
-# Extract the Morning Journal section's priority block. The block starts at
+# Extract the Morning Brief section's priority block. The block starts at
 # `**Today's priorities` and runs until the next `---` separator.
 python3 - "$hub_path" <<'PY'
 import sys, re, json, os

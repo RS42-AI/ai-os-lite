@@ -72,7 +72,7 @@ CONTENT_SUBFOLDERS = {"Notes", "Tasks", "Dev Log", "Specs", "Resources", "Meetin
 # per note. Repeated *content* headings (Symptoms, Root Cause, The Fix...) across
 # multi-incident notes are legitimate and are NOT flagged.
 STRUCTURAL_HEADINGS = {
-    "morning journal", "ai summary", "current status", "overview", "control queue",
+    "morning brief", "morning journal", "ai summary", "current status", "overview", "control queue",
     "today's plan", "work anchor", "routing exceptions", "overall read",
     "threads to keep visible", "execution report", "today's accomplishments",
     "tomorrow preview", "wind down", "objective", "key results",

@@ -1,5 +1,5 @@
 #!/bin/bash
-# ensure_journal.sh — Creates the morning journal entry if it doesn't exist.
+# ensure_journal.sh — Creates the Morning Brief if it doesn't exist.
 # Deterministic template rendering. No LLM judgment needed.
 # Usage: ensure_journal.sh YYYY-MM-DD [VAULT_PATH]
 #
@@ -36,9 +36,10 @@ type: journal
 journal_type: morning
 tags:
   - journal
-habit_journaled: false
-habit_exercise: false
+habit_morning_brief: false
 ---
+
+%% \`habit_morning_brief\` is set to true by /process-morning. Add your own \`habit_*\` properties only if they are useful to you; no personal habit is required. The \`journal\` type and path remain for backward compatibility. %%
 
 # Daily Hub: [[1. Daily/${TARGET_DATE}|${TARGET_DATE}]]
 
@@ -151,9 +152,10 @@ views:
 
 ## Morning
 
+%% Optional: write or dictate anything that would help you orient, decide, or reflect. The prepared brief above remains useful even when you add nothing here. %%
 
 ### AI Summary
-*(filled by /process-journal)*
+*(filled by /process-morning when you add a morning entry)*
 TEMPLATE
 
 jq -n --arg path "5. Resources/Personal/Journal/Morning Entries/${TARGET_DATE}.md" \

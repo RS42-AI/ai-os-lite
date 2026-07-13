@@ -1,6 +1,6 @@
 ---
 name: prep-evening
-description: Evening prep that writes today's accomplishments, highlights, and a gentle wind-down prompt to the evening journal page. The evening mirror of /start-day. Designed to run as a cron job (~8pm) but can also be invoked manually. Use when the user says "prep evening", "evening prep", or "/prep-evening".
+description: Prepare an optional Evening Entry with today's accomplishments, tomorrow's shape, and a gentle wind-down. The evening mirror of /start-day; designed for scheduled or manual use without requiring journaling, gratitude, or personal habit disclosure. Use when the user says "prep evening", "evening prep", or "/prep-evening".
 user-invocable: true
 allowed-tools:
   # Obsidian CLI (file read/write)
@@ -20,26 +20,26 @@ allowed-tools:
   # QMD Search (for devlog lookup)
   - mcp__qmd__search
   - mcp__qmd__vector_search
-  # Linear MCP (task cross-reference for RS42 devlogs)
+  # Linear MCP (task cross-reference when configured)
   - mcp__linear__list_issues
 ---
 
 # Prep Evening
 
-Prep tonight's evening journal page with today's accomplishments, highlights, and a gentle wind-down prompt. This is Phase A of the evening loop: **AI preps the reflection before you journal.**
+Prepare tonight's optional Evening Entry with accomplishments, tomorrow's shape, and a gentle wind-down. This is Phase A of the evening loop: **the AI prepares useful context; the user's reflection is optional.**
 
 ## Why This Exists
 
-The end of the day leads to a great start the next day. Without a structured wind-down, the evening drifts → time gets lost → next morning starts behind. `/prep-evening` provides the transition point: review what you accomplished, reflect, check habits, and set up tomorrow.
+`/prep-evening` provides a low-friction transition: show what moved, what remains open, and what tomorrow looks like. The prepared entry is useful on its own. The user can add free-form words if reflection would help.
 
 ## Key Principles
 
-1. **Write to the evening journal page.** The context goes to `5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD.md`.
+1. **Write to the Evening Entry.** The compatibility path remains `5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD.md`.
 2. **Create the file if it doesn't exist.** Unlike `/start-day` (which requires a daily hub), this skill creates the evening entry on demand.
-3. **Tone is warm and encouraging.** This is a wind-down, not a performance review. Highlight what went well. Gently note what could improve.
-4. **Keep it brief.** Short bullets. You'll glance at this before reflecting.
-5. **Don't overlap with /process-evening.** This skill preps context; `/process-evening` processes the user's voice/written reflection, triages Still Open tasks, and suggests new tasks.
-6. **Still Open lives at the bottom.** The Still Open section is placed after the Reflection section — it's the interactive part that `/process-evening` will update after processing the user's reflection.
+3. **Tone is warm and factual.** This is a wind-down, not a performance review. Do not prescribe improvement, gratitude, or habits.
+4. **Keep it brief.** Short bullets that are useful even when the user adds nothing.
+5. **Don't overlap with /process-evening.** This skill prepares context; `/process-evening` handles optional human input, triages Still Open tasks, and suggests new tasks.
+6. **Still Open lives at the bottom.** It remains the interactive section `/process-evening` can update.
 7. **No silent failures.** Track every external source call. Report what succeeded, what failed, and what was skipped. See `vault-config/references/source-manifest.md`.
 
 ## Sources
@@ -53,7 +53,7 @@ Track all source calls per `vault-config/references/source-manifest.md`. This sk
 | QMD Search | Devlog lookup (backup to glob) | MEDIUM |
 | Todoist CLI | Completed tasks, remaining tasks | HIGH |
 | GWS Calendar | Tomorrow preview | MEDIUM |
-| Linear MCP | Cross-reference devlogs against RS42 issues | LOW |
+| Linear MCP | Cross-reference devlogs against configured Linear issues | LOW |
 | Task Notes | Task note frontmatter (all projects) | MEDIUM |
 
 ## Invocation
@@ -80,7 +80,7 @@ Track all source calls per `vault-config/references/source-manifest.md`. This sk
 
 ### Step 2: Create or Open Evening Entry
 
-Check if the evening journal entry exists:
+Check if the Evening Entry exists:
 
 ```bash
 obsidian read path="5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD.md"
@@ -89,7 +89,7 @@ obsidian read path="5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD.md"
 **If it doesn't exist**: Create it with the evening template content (resolved, not Templater syntax):
 
 ```bash
-obsidian create path="5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD.md" content="---\ndate: YYYY-MM-DD\ntype: journal\njournal_type: evening\ntags:\n  - journal\nhabit_journaled: false\ntodoist_tasks_created: false\n---\n\n## Evening Habits\n- [ ] Journaled\n\n### Today's Accomplishments\n\n### Tomorrow Preview\n\n### Wind Down\n\n---\n## Evening\n\n\n## Reflection\n\n**What went well today:**\n\n\n**What could I improve:**\n\n\n**Grateful for:**\n1.\n2.\n3.\n\n---\n\n###### Still Open\n"
+obsidian create path="5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD.md" content="---\ndate: YYYY-MM-DD\ntype: journal\njournal_type: evening\ntags:\n  - journal\nhabit_evening_reflection: false\n---\n\n### Today's Accomplishments\n\n### Tomorrow Preview\n\n### Wind Down\n\n---\n\n## Evening\n\n%% Optional: write or dictate anything you want to preserve from the day. There are no required prompts, gratitude lists, or habit checklists. %%\n\n### AI Summary\n*(filled by /process-evening when you add an evening entry)*\n\n---\n\n###### Still Open\n"
 ```
 
 **If it already exists**: Check for existing `### Today's Accomplishments` section. If present, replace individual sections (idempotent re-run).
@@ -139,7 +139,7 @@ For each devlog, determine its task linkage:
 td task list --filter "completed today" --json --full
 ```
 
-If no completed tasks API exists, check today's morning journal for the work priorities that were set and note them.
+If no completed tasks API exists, check today's Morning Brief for the work priorities that were set and note them.
 
 Group completed tasks by project. For each, note the task content and project.
 
@@ -204,9 +204,9 @@ gws calendar events list --params '{"calendarId":"primary","timeMin":"YYYY-MM-DD
 
 Quick preview of tomorrow so the user can mentally prepare. If empty, note "No meetings tomorrow."
 
-### Step 4: Write Context to Evening Journal
+### Step 4: Write Prepared Context to Evening Entry
 
-Write context to three separate sections in the evening entry. No `## Context` wrapper — sections sit directly between `## Evening Habits` and the `---` before `## Evening`.
+Write context to three separate sections in the Evening Entry. There is no `## Context` or `## Evening Habits` wrapper; operational sections sit directly before the `---` that opens `## Evening`.
 
 #### 4a: Write Accomplishments
 
@@ -243,7 +243,7 @@ mcp__obsidian-mcp-tools__patch_vault_file(
     operation="replace",
     targetType="heading",
     target="Wind Down",
-    content="""[Warm, personalized 1-2 sentences based on today's accomplishments. Reference specific wins. End with "Check your evening habits, reflect on what went well, and rest. Tomorrow is prepped."]
+    content="""[Warm, concise 1-2 sentences based on today's accomplishments. Reference specific movement. End with "Reflect in your own words if it would help, then rest. Tomorrow is prepped."]
 """
 )
 ```
@@ -261,7 +261,7 @@ mcp__obsidian-mcp-tools__patch_vault_file(
 )
 ```
 
-Still Open is at the bottom of the entry (after `## Reflection`, below the `---` separator). This is intentional — it's the interactive section that `/process-evening` will update after triaging tasks against the user's reflection.
+Still Open is at the bottom of the entry (after `## Evening` and its nested `### AI Summary`, below the `---` separator). This is intentional: `/process-evening` can update it after triaging tasks against optional human input.
 
 #### Format Rules
 
@@ -294,7 +294,7 @@ Rules:
 > **DO THIS**: `- [ ] [[{WorkArea}]] / [[{Project}]] — Follow up on {Project2} stakeholder meeting *(p2)*`
 > **NEVER THIS**: `**[{WorkArea}/p2]** Follow up on {Project2} stakeholder meeting` ← renders as broken purple links in Obsidian
 
-**Still Open** — remaining Todoist tasks with devlog progress annotations. Uses the unified quick-link checkbox format. Lives at the bottom of the entry (after Reflection, below `---`). This section is a **living section** — `/process-evening` will update it after triaging tasks against the user's reflection:
+**Still Open** — remaining Todoist tasks with devlog progress annotations. Uses the unified quick-link checkbox format. It lives at the bottom of the entry and remains a **living section** that `/process-evening` may update:
 ```markdown
 ###### Still Open
 - [ ] [[{WorkArea}]] / [[{Project}]] — Design carry-forward task lifecycle *(p3, 4 sessions today — task triage, evening flow, format unification)*
@@ -331,12 +331,14 @@ Rules:
 **Wind Down** — always present, warm tone:
 ```markdown
 ### Wind Down
-Time to step back. You got things done today. Check your evening habits, reflect on what went well, and rest. Tomorrow is prepped.
+Time to step back. Reflect in your own words if it would help, then rest. Tomorrow is prepped.
 ```
 
 ### Step 4e: Cross-Off Completed Priorities on Daily Hub
 
 Read today's daily hub at `1. Daily/YYYY-MM-DD.md` and find the **Today's priorities** section. Cross-reference each priority against today's devlogs:
+
+Use `Morning Brief` as the patch heading for current hubs. If an older hub contains only the legacy `Morning Journal` heading, patch that heading in place rather than creating a duplicate.
 
 1. Read the daily hub and parse the "Today's priorities" section
 2. For each unchecked priority (`- [ ]`):
@@ -349,8 +351,8 @@ mcp__obsidian-mcp-tools__patch_vault_file(
     filename="1. Daily/YYYY-MM-DD.md",
     operation="replace",
     targetType="heading",
-    target="Morning Journal",
-    content="""> [[5. Resources/Personal/Journal/Morning Entries/YYYY-MM-DD|Open Morning Entry]]
+    target="Morning Brief",
+    content="""> [[5. Resources/Personal/Journal/Morning Entries/YYYY-MM-DD|Open Morning Brief]]
 
 
 **Today's priorities:**
@@ -378,7 +380,7 @@ Evening prep complete for YYYY-MM-DD.
 **Still open**: N tasks remaining
 **Tomorrow**: N meetings scheduled
 
-Evening journal prepped: [[5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD]]
+Evening Entry prepared: [[5. Resources/Personal/Journal/Evening Entries/YYYY-MM-DD]]
 Time to wind down.
 
 ---
@@ -411,12 +413,12 @@ Only include the Warnings and Fix sections if there are actual warnings.
 | Calendar API fails | Write "Calendar unavailable", record `FAILED` in execution report, continue |
 | Evening entry already has sections | Replace individual heading content (idempotent) |
 | Run before 5pm | Still works, but context will be incomplete (may add more devlogs later) |
-| Weekend / no work | Still runs — personal accomplishments and habits still matter |
+| Weekend / no work | Still runs — a light review and tomorrow preview can remain useful |
 
 ## What This Skill Does NOT Do
 
 - Does not process the evening voice transcript (that's `/process-evening`)
 - Does not create Todoist tasks (that's `/process-evening` or manual)
 - Does not update the daily hub
-- Does not read habit checkboxes (that's `/process-evening`)
+- Does not create, infer, or expose personal habits
 - Does not track streaks (that's `/weekly-review`, future)

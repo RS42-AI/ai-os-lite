@@ -1,6 +1,6 @@
 ---
-name: process-journal
-description: Process a morning journal entry — extract AI summary, mood, gratitude, people, and daily planning intent. Write private reflection to the journal and render the committed daily hub as Work Anchor, Control Queue, Today's Plan, and Routing Exceptions. Extracted actionable items can become task notes/Todoist mirrors with dedup and batch approval. Use when the user says "process journal", "process today's journal", or "/process-journal".
+name: process-morning
+description: Process a Morning Brief — extract an AI summary, mood, people, and daily planning intent, then render the committed daily hub as Work Anchor, Control Queue, Today's Plan, and Routing Exceptions. Extracted actionable items can become task notes/Todoist mirrors with dedup and batch approval. Use when the user says "process morning", "process my morning", the legacy phrase "process journal", or "/process-morning".
 user-invocable: true
 allowed-tools:
   # Obsidian CLI (file read/write via Bash)
@@ -20,23 +20,24 @@ allowed-tools:
   # Todoist CLI (task creation and dedup)
   - Bash(td task:*)
   - Bash(td comment:*)
-  # Process-journal scripts (data collection + git commit)
-  - Bash(bash ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/*.sh:*)
+  # Process-morning scripts (data collection + git commit)
+  - Bash(bash ${CLAUDE_PLUGIN_ROOT}/skills/process-morning/scripts/*.sh:*)
   - Bash(bash ${CLAUDE_PLUGIN_ROOT}/skills/start-day/scripts/match_task_note.sh:*)
-  - Bash(python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/*.py:*)
+  - Bash(python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-morning/scripts/*.py:*)
   - Bash(chmod:*)
 ---
 
-# Process Journal
+# Process Morning
 
-Extract structured insights from a raw morning journal transcript. Write the full AI analysis to the **journal entry** (private) and a daily operating plan to the **daily hub** (visible).
+Process the user's Morning Brief after `/start-day` has prepared it. Keep the raw words intact, write a private AI Summary beside them, and commit an evidence-grounded operating plan to the daily hub.
 
 ## Key Principles
 
-1. **The raw transcript stays untouched.** The voice transcript under `## Morning` and `## Evening` is never modified.
-2. **Full insights go to the journal entry.** The `### AI Summary` section (with mood, all priorities, gratitude) replaces the placeholder at the bottom of the journal entry (nested under `## Morning`). This is the private reflection space.
+1. **The raw Morning Brief stays untouched.** Voice or typed content under `## Morning` is never modified.
+2. **Full insights stay private.** The `### AI Summary` section replaces its placeholder under `## Morning`. Gratitude is included only when the user actually mentions it; it is never prompted or fabricated.
 3. **The daily hub gets the committed operating plan.** This is the ONLY place the Work Anchor, Control Queue, Today's Plan, and Routing Exceptions are written — not the morning entry. The old Must do / Focus work / If time render is deprecated for v3.
-4. **No silent failures.** Track every external source call. Report what succeeded, what failed, and what was skipped. See `vault-config/references/source-manifest.md`.
+4. **Completion is deterministic.** After a successful write, stamp `habit_morning_brief: true`; all other `habit_*` fields remain user-owned.
+5. **No silent failures.** Track every external source call. Report what succeeded, what failed, and what was skipped. See `vault-config/references/source-manifest.md`.
 
 ## Sources
 
@@ -44,7 +45,7 @@ Track all source calls per `vault-config/references/source-manifest.md`. This sk
 
 | Source | Used For | Criticality |
 |--------|---------|-------------|
-| Obsidian CLI | Read journal transcript, write AI Summary | REQUIRED |
+| Obsidian CLI | Read the Morning Brief, write AI Summary | REQUIRED |
 | Obsidian MCP | Patch sections, create task notes | REQUIRED |
 | QMD Search | People lookup in vault contacts | LOW |
 | Todoist CLI | Task creation, dedup check | HIGH |
@@ -53,18 +54,18 @@ Track all source calls per `vault-config/references/source-manifest.md`. This sk
 ## Invocation
 
 ```
-/process-journal                       → process today's entry
-/process-journal 2026-03-08            → process a specific date
-/process-journal 2026-05-18 --dry-run  → render to stdout/tmpfile, do not write the vault
+/process-morning                       → process today's entry
+/process-morning 2026-03-08            → process a specific date
+/process-morning 2026-05-18 --dry-run  → render to stdout/tmpfile, do not write the vault
 ```
 
 **Dry-run mode** (`--dry-run` flag):
-- Step 6 (AI Summary) and Step 8 (daily hub render) write their would-be content to `/tmp/process-journal-dryrun-$today.md` instead of patching the vault.
+- Step 6 (AI Summary) and Step 8 (daily hub render) write their would-be content to `/tmp/process-morning-dryrun-$today.md` instead of patching the vault.
 - Step 7 (task notes / Todoist) is skipped entirely — no creates, no Todoist API calls.
 - Step 4 (idempotency marker check) still runs, but a detected marker just emits a warning — no prompt to re-run.
 - The bottom marker append (Step 7g) is skipped.
 
-Pass `--dry-run` as the second argument after any date: `/process-journal 2026-05-18 --dry-run`.
+Pass `--dry-run` as the second argument after any date: `/process-morning 2026-05-18 --dry-run`.
 
 ## Workflow
 
@@ -85,7 +86,7 @@ Pass `--dry-run` as the second argument after any date: `/process-journal 2026-0
 **Use Obsidian CLI (NOT MCP) for reads:**
 
 ```bash
-# Journal entry (raw transcript)
+# Morning Brief (stored at the legacy-compatible journal path)
 obsidian read path="5. Resources/Personal/Journal/Morning Entries/YYYY-MM-DD.md"
 
 # Daily note hub (target for Work Anchor / Control Queue / Today's Plan)
@@ -94,13 +95,13 @@ obsidian read path="1. Daily/YYYY-MM-DD.md"
 
 **DO NOT use** `mcp__obsidian-mcp-tools__get_vault_file` — use `obsidian read` per the Tool Rules above.
 
-**If journal entry doesn't exist**: Report "No journal entry found for YYYY-MM-DD" and stop.
+**If the Morning Brief doesn't exist**: Report "No Morning Brief found for YYYY-MM-DD" and stop.
 
 **If daily note doesn't exist**: Report "No daily note found for YYYY-MM-DD. Create one first with Cmd+Shift+D in Obsidian." and stop.
 
 ### Step 3: Read Habit Data from Frontmatter
 
-Read **all** `habit_*` properties present in the journal entry's frontmatter — do not assume a fixed set. The habit schema is owned by the journal template (`system-settings/Templates/Journal Entry Template.md`); this skill reads whatever `habit_*` fields the entry actually carries. They are the single source of truth — the user sets them via Obsidian's Properties panel.
+Read **all** `habit_*` properties present in the Morning Brief frontmatter — do not assume a fixed set. The template owns the schema. `habit_morning_brief` is system-owned and is stamped `true` after successful processing. Every other habit remains user-owned through Obsidian's Properties panel.
 
 Extract every `habit_*` line from the frontmatter block:
 
@@ -109,7 +110,7 @@ obsidian read path="5. Resources/Personal/Journal/Morning Entries/YYYY-MM-DD.md"
   | awk '/^---$/{c++; next} c==1 && /^habit_/'
 ```
 
-This lists each `habit_*: value` pair the entry carries (e.g. the starter set `habit_journaled`, `habit_exercise` — but read what's there, don't hardcode; users define their own set in the journal template). If the user tracks a gratitude habit (`habit_gratitude`), it may be set to `true` during Step 6 when 3 gratitude items are extracted.
+This lists each `habit_*: value` pair the entry carries. Do not hardcode or auto-set lifestyle habits. If the user tracks gratitude, only report what their frontmatter or prose actually says.
 
 No parsing or syncing needed — frontmatter IS the data.
 
@@ -138,7 +139,7 @@ obsidian read path="5. Resources/Personal/Journal/Morning Entries/YYYY-MM-DD.md"
 
   Wait for confirmation. If the user declines, stop with a short message.
 
-**On re-run (user confirmed)**: extract the existing priorities from the current `### AI Summary` and the daily hub's `**Today's priorities:**` section before re-extracting in Step 5. These will be merged (dedup by description) in Step 8.
+**On re-run (user confirmed)**: extract the existing AI Summary and the current daily hub `## Morning Brief` block before re-extracting in Step 5. Preserve reused task-note links and completion state during the Step 8 re-render.
 
 **Frontmatter flag**: the old `todoist_tasks_created` frontmatter flag is no longer used. If present on an old entry, ignore it — the marker line is the sole idempotency source.
 
@@ -151,7 +152,7 @@ Extraction is no longer transcript-only. It runs five reads in parallel and merg
 Before making any lane decisions, run the deterministic v3 gatherer:
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/gather_daily_plan_context.py TARGET_DATE "${PERSONAL_OS_VAULT:-$HOME/Claude/ObsidianVault}" > "$TMPDIR/process-journal-v3-context.json"
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-morning/scripts/gather_daily_plan_context.py TARGET_DATE "${PERSONAL_OS_VAULT:-$HOME/Claude/ObsidianVault}" > "$TMPDIR/process-morning-v3-context.json"
 ```
 
 This script treats frontmatter as the local API and returns structured candidates:
@@ -191,10 +192,10 @@ Area ordering used for sorting candidates (`priority_sort`/`focus_sort` in the g
 | # | Source | How |
 |---|---|---|
 | 1 | Today's transcript (`## Morning` section) | `obsidian read path="5. Resources/Personal/Journal/Morning Entries/$today.md"` then extract under `## Morning` |
-| 2 | Prior-day hub | `bash ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/parse_prior_hub.sh $yesterday` |
-| 3 | `/start-day`'s in-journal Warm/Cold recap | `bash ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/parse_startday_recap.sh $today` |
+| 2 | Prior-day hub | `bash ${CLAUDE_PLUGIN_ROOT}/skills/process-morning/scripts/parse_prior_hub.sh $yesterday` |
+| 3 | `/start-day`'s in-journal Warm/Cold recap | `bash ${CLAUDE_PLUGIN_ROOT}/skills/process-morning/scripts/parse_startday_recap.sh $today` |
 | 4 | Project hub `Current Status` snapshots (only for projects named in transcript) | `obsidian read path="<hub>"` then locate `## Current Status` |
-| 5 | Contact context for each named person | `bash ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/resolve_contact.sh "<name>"` per name |
+| 5 | Contact context for each named person | `bash ${CLAUDE_PLUGIN_ROOT}/skills/process-morning/scripts/resolve_contact.sh "<name>"` per name |
 
 Run sources 2, 3, and 5 unconditionally. Run source 4 only for projects the transcript explicitly names. Source 1 is the spine.
 
@@ -234,7 +235,7 @@ For each candidate priority surfaced by 5a/5b/5c that has an associated project 
    - Empty / missing / `"[]"` / no task note → run inference (next step).
 2. Run the blocker scanner:
    ```bash
-   bash ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/scan_blockers.sh "<priority text>" "<project slug>" "<transcript path>"
+   bash ${CLAUDE_PLUGIN_ROOT}/skills/process-morning/scripts/scan_blockers.sh "<priority text>" "<project slug>" "<transcript path>"
    ```
    ~10 second budget per priority. If the scanner returns zero hits, move on (no prompt). If hits are very high (>20), summarize the top 5 by source diversity before presenting.
 3. If the scanner returns hits, propose them in a single prompt to the user:
@@ -262,7 +263,7 @@ If no task note exists for the priority and the user confirms blockers, the `blo
 
 For each first-name mentioned in the transcript:
 
-1. Run `bash ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/resolve_contact.sh "<name>"`.
+1. Run `bash ${CLAUDE_PLUGIN_ROOT}/skills/process-morning/scripts/resolve_contact.sh "<name>"`.
 2. If `found: true`: use the canonical wikilink + context summary in any priority bullet that mentions this person.
 3. If `found: false`: use the raw name as a red wikilink (`[[Raw Name]]`) so clicking it creates the contact page later.
 4. For names that appear in the AI Summary's `People mentioned` line (Step 6), use the same resolved wikilinks. Do not duplicate the resolution.
@@ -277,7 +278,7 @@ After 5b/5c/5d/5e produce their candidate sets, extract from the transcript itse
 - **Today's transcript-explicit priorities** — verbs of intent ("I want to", "I need to", "we have to", "let's", "going to"). Each becomes a candidate with `source: "transcript"` and a `project_hint` extracted from surrounding context (project name mentioned, area implied).
 - **Research questions** (new) — patterns like "I wonder if X can…", "can we…", "is there a way to…". **5/18 delta (Decision 2):** these become first-class task-note candidates with `tags: [task, research]`. They do NOT render in a separate "Research questions" lane — they surface via the existing Tasks Overview Base on the daily hub. Treat as a regular candidate with `lane_hint` determined by Section 8a rules; the `research` tag is added in Step 7 (task-note creation).
 - **AI-handoff candidates** (new) — explicit language like "AI can definitely handle", "the AI should be able to", "dispatch this". Each becomes a candidate with `lane_hint: "could-hand-off-to-ai"` and `ai_capability: "ai-handoff"` (set in 5h).
-- **Gratitude** — same as v1. Must be explicitly stated; never inferred. If not stated, mark missing: `**Gratitude**: ⚠️ No gratitude entry today. What are 3 things you're grateful for?`
+- **Gratitude** — optional. Include only when explicitly stated or intentionally tracked; never infer, require a count, or prompt for it. If absent, omit it silently.
 - **People mentioned** — feed into 5e.
 
 #### 5g: Merge candidates with dedup
@@ -302,20 +303,20 @@ Persist the classification on the candidate as `ai_capability`. Step 7 (task-cre
 
 ### Step 6: Write AI Summary to Journal Entry
 
-The `### AI Summary` heading already exists at the bottom of the journal entry (placed by `ensure_journal.sh` with placeholder text, nested under `## Morning`). Render the private summary from the same v3 context JSON used by the daily hub, then replace the heading body.
+The `### AI Summary` heading already exists at the bottom of the Morning Brief (placed by `ensure_journal.sh`, nested under `## Morning`). Render the private summary from the same context JSON used by the daily hub, then replace the heading body.
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/gather_daily_plan_context.py TARGET_DATE "${PERSONAL_OS_VAULT:-$HOME/Claude/ObsidianVault}" > "$TMPDIR/process-journal-v3-context.json"
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/render_ai_summary.py "$TMPDIR/process-journal-v3-context.json" > "$TMPDIR/process-journal-ai-summary.md"
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-morning/scripts/gather_daily_plan_context.py TARGET_DATE "${PERSONAL_OS_VAULT:-$HOME/Claude/ObsidianVault}" > "$TMPDIR/process-morning-v3-context.json"
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-morning/scripts/render_ai_summary.py "$TMPDIR/process-morning-v3-context.json" > "$TMPDIR/process-morning-ai-summary.md"
 ```
 
 Script-only runs may apply the rendered summary directly:
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/write_ai_summary.py "$TMPDIR/process-journal-v3-context.json" "${PERSONAL_OS_VAULT:-$HOME/Claude/ObsidianVault}"
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-morning/scripts/write_ai_summary.py "$TMPDIR/process-morning-v3-context.json" "${PERSONAL_OS_VAULT:-$HOME/Claude/ObsidianVault}"
 ```
 
-Interactive skill runs compose the full body — the rendered work-signal paragraphs from `render_ai_summary.py`, plus the model's own Mood/Gratitude/People-mentioned extraction from the transcript (per the extraction rules below) — and patch it in one call:
+Interactive skill runs compose the full body — the rendered work-signal paragraphs from `render_ai_summary.py`, plus Mood, optional explicitly stated Gratitude, and People-mentioned extraction — and patch it in one call:
 
 ```python
 mcp__obsidian-mcp-tools__patch_vault_file(
@@ -323,13 +324,10 @@ mcp__obsidian-mcp-tools__patch_vault_file(
     operation="replace",
     targetType="heading",
     target="AI Summary",
-    content="""<rendered paragraphs from process-journal-ai-summary.md>
+    content="""<rendered paragraphs from process-morning-ai-summary.md>
 
 **Mood**: [extracted mood]
-**Gratitude**:
-1. [item 1]
-2. [item 2]
-3. [item 3]
+**Gratitude**: [only when explicitly present; otherwise omit]
 **People mentioned**: [[Person 1]], [[Person 2]]
 """
 )
@@ -351,7 +349,7 @@ If not found: `[[{Contact}]]` (red link — creates page when clicked)
 **Re-processing (merge behavior)**: If the user re-processes an already-processed entry (Step 3 confirmed):
 
 1. **Summary and mood**: Replace with fresh extraction (these are subjective — always use the latest read)
-2. **Gratitude and people**: Replace with fresh extraction
+2. **Optional gratitude and people**: Replace with fresh extraction; omit gratitude when absent
 3. **Daily hub plan**: re-render the v3 Work Anchor / Control Queue / Today's Plan in Step 8. Deduplicate by canonical task/note link where possible.
 
 Use `replace` on the existing `AI Summary` heading instead of `append`. Do NOT include `### AI Summary` in the content when using `replace` — the heading itself is preserved by the patch tool.
@@ -559,21 +557,21 @@ Where `timestamp` is `YYYYMMDDHHMM` (e.g., `202604201239`) and `todoist_count` i
 
 **Re-run** (existing marker detected in Step 4): REPLACE the existing marker line in place — do NOT append a second marker line. Use direct file edit (read the file, `sed`-replace the `*Processed ...` line, write back). Appending would compound the MCP `patch_vault_file` bottom-append bug that motivated this refinement.
 
-**Do NOT** set any frontmatter flag — `todoist_tasks_created` and `journal_processed` are both dropped. The marker line is the sole idempotency source.
+Do not set `todoist_tasks_created` or `journal_processed`; the marker line remains the idempotency source. Separately, set the system completion signal `habit_morning_brief: true` after the AI Summary and daily hub write succeed. Never alter other `habit_*` fields.
 
 ### Step 8: Write Daily Hub v3
 
-This step writes the committed daily operating plan to the daily hub via a single heading patch on `Morning Journal`. For v3, use the deterministic context and renderer scripts:
+This step writes the committed daily operating plan to the daily hub via a single heading patch on `Morning Brief`. For a hub created by an older template, patch the legacy `Morning Journal` heading in place; do not add a duplicate section. New hubs always use `Morning Brief`. For v3, use the deterministic context and renderer scripts:
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/gather_daily_plan_context.py TARGET_DATE "${PERSONAL_OS_VAULT:-$HOME/Claude/ObsidianVault}" > "$TMPDIR/process-journal-v3-context.json"
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/render_daily_hub_v3.py "$TMPDIR/process-journal-v3-context.json" > "$TMPDIR/process-journal-v3-hub.md"
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-morning/scripts/gather_daily_plan_context.py TARGET_DATE "${PERSONAL_OS_VAULT:-$HOME/Claude/ObsidianVault}" > "$TMPDIR/process-morning-v3-context.json"
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-morning/scripts/render_daily_hub_v3.py "$TMPDIR/process-morning-v3-context.json" > "$TMPDIR/process-morning-v3-hub.md"
 ```
 
 The rendered block must use this section contract:
 
 ```markdown
-> [[5. Resources/Personal/Journal/Morning Entries/TARGET_DATE|Open Morning Entry]]
+> [[5. Resources/Personal/Journal/Morning Entries/TARGET_DATE|Open Morning Brief]]
 
 ### Work Anchor
 ### Control Queue
@@ -595,18 +593,18 @@ mcp__obsidian-mcp-tools__patch_vault_file(
     filename=f"1. Daily/{today}.md",
     operation="replace",
     targetType="heading",
-    target="Morning Journal",
-    content="<full v3 block from process-journal-v3-hub.md>",
+    target="Morning Brief",
+    content="<full v3 block from process-morning-v3-hub.md>",
 )
 ```
 
-The model may refine the Work Anchor and plan wording after reading the context JSON, but it must preserve the queried lane membership unless it can point to a source object in `process-journal-v3-context.json`.
+The model may refine the Work Anchor and plan wording after reading the context JSON, but it must preserve the queried lane membership unless it can point to a source object in `process-morning-v3-context.json`.
 
 #### 8-legacy: Six-Lane Priorities Renderer (deprecated for v3)
 
 The notes below describe the old Must do / Focus work / If time / Could hand off / Also on radar / Execution strategy renderer. Do not use them for current v3 daily hubs.
 
-This legacy step composes the 6-lane priorities block and writes it to the daily hub via a single MCP heading patch on `Morning Journal`. The lanes are populated from the merged candidate list produced in Step 5g, classified by `lane_hint`, then rendered with capability markers, inline chain back-references, and contextual suffixes. By the time this step runs, Step 7 has already created task notes for every actionable candidate — so every bullet wikilinks to a real note, no `(no task note — create)` placeholders.
+This legacy step composes the 6-lane priorities block and writes it to the daily hub via a single MCP heading patch on `Morning Brief`. The lanes are populated from the merged candidate list produced in Step 5g, classified by `lane_hint`, then rendered with capability markers, inline chain back-references, and contextual suffixes. By the time this step runs, Step 7 has already created task notes for every actionable candidate — so every bullet wikilinks to a real note, no `(no task note — create)` placeholders.
 
 #### 8-pre: Read existing hub state
 
@@ -614,7 +612,7 @@ This legacy step composes the 6-lane priorities block and writes it to the daily
 obsidian read path="1. Daily/$today.md"
 ```
 
-Confirm the `## Morning Journal` heading exists at H2. On a re-run, extract any existing bullets under each lane for merge (8i).
+Confirm `## Morning Brief` exists at H2. If only legacy `## Morning Journal` exists, use that as the patch target for this entry. On a re-run, extract existing bullets for merge (8i).
 
 #### 8a: Lane classification — assign each candidate to one of six lanes
 
@@ -639,7 +637,7 @@ If a candidate matches none of the lanes above, default to **Focus work**.
 
 Synthesize a single `(meta-theme: …)` subtitle from the transcript + carry-forward state. Goal: one phrase that captures what the day is *about*. Examples from prior days:
 
-- `*(meta-theme: system-build has been blocking deliverables; today is about closing the loop — ship process-journal v2, batch the comms debt, dispatch the autonomous-handoff layer)*`
+- `*(meta-theme: system-build has been blocking deliverables; today is about closing the loop — ship process-morning v2, batch the comms debt, dispatch the autonomous-handoff layer)*`
 
 Heuristics:
 - If a single project dominates Must do + Focus work, the meta-theme is "ship X" or "close the loop on X".
@@ -707,7 +705,7 @@ N. **<Phase label>** → <wikilink(s) to bullets above> (<lane reference>)
 
 Examples (5/18 fixture):
 ```
-1. **Now** → [[Ship /process-journal v2 today]] (Must do)
+1. **Now** → [[Ship /process-morning v2 today]] (Must do)
 2. **Quick discovery** → [[Email {advisor} to set meeting date]] + [[Confirm {deadline} status and schedule prep block]] (Must do)
 3. **Reply batch — single 30-min block** → [[Reply to {Contact}...|{Contact}]] · [[Reply to {Contact1}...|{Contact1}]] · ... (Must do)
 4. **🤖 Dispatch AI handoffs in background** → [[Mobile app bug review and fix pass|Portfolio fix]] · ... (Could hand off to AI — all N)
@@ -742,7 +740,7 @@ Pipe aliases (`[[Long Task Name|short label]]`) are encouraged where the canonic
 Assemble in this exact order (omit empty lanes):
 
 ```
-> [[5. Resources/Personal/Journal/Morning Entries/$today|Open Morning Entry]]
+> [[5. Resources/Personal/Journal/Morning Entries/$today|Open Morning Brief]]
 
 **Today's priorities** *(meta-theme: <synthesized day theme from 8b>)*
 
@@ -782,14 +780,14 @@ mcp__obsidian-mcp-tools__patch_vault_file(
     filename=f"1. Daily/{today}.md",
     operation="replace",
     targetType="heading",
-    target="Morning Journal",
+    target="Morning Brief",
     content="<full block above>",
 )
 ```
 
 #### 8h: Guard against duplicate sections
 
-After patching, re-read the daily hub. If a duplicate `Morning Journal` section appears at the bottom (known MCP `patch_vault_file` issue), remove it via direct file edit.
+After patching, re-read the daily hub. If a duplicate `Morning Brief` section appears at the bottom (known MCP `patch_vault_file` issue), remove it via direct file edit.
 
 #### 8i: Re-run merge behavior
 
@@ -805,7 +803,7 @@ If Step 4's idempotency check detected an existing bottom marker and the user co
 Snapshot the processing run's output in the vault git repo so the morning-recording → processing → nightly-`/vault-commit` chain shows up as three distinct, legible git steps instead of folding processing into `/vault-commit`'s nightly pass:
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/commit_journal_processing.sh TARGET_DATE VAULT_PATH [TASK_NOTE_REL...]
+bash ${CLAUDE_PLUGIN_ROOT}/skills/process-morning/scripts/commit_journal_processing.sh TARGET_DATE VAULT_PATH [TASK_NOTE_REL...]
 ```
 
 `VAULT_PATH` is `${PERSONAL_OS_VAULT:-$HOME/Claude/ObsidianVault}`. Pass the vault-relative paths of every task note created or modified in Step 7c as additional arguments. The script commits:
@@ -814,25 +812,25 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/process-journal/scripts/commit_journal_process
 - `1. Daily/TARGET_DATE.md` (priorities block written in Steps 8a–8g)
 - Any task notes passed as arguments (created in Step 7c)
 
-with the message `docs: process-journal for TARGET_DATE`.
+with the message `docs: process-morning for TARGET_DATE`.
 
 **If the task note list is empty** (user declined all creation in Step 7f, or this is a re-run with no new task notes): omit the task note arguments — the script falls back to the two core paths.
 
 Parse the JSON output:
 - `{committed: true, sha, ...}` — report the commit in Step 9's execution report.
 - `{committed: false, reason: "no_changes"}` — re-run with nothing new to commit; report as skipped, not a failure.
-- `{committed: false, error: "..."}` — the commit failed. **Warn, don't abort**: continue to Step 9 and surface the error in the Warnings section. The journal entry and daily hub are already written; a missed snapshot must not block the morning workflow.
+- `{committed: false, error: "..."}` — the commit failed. **Warn, don't abort**: continue to Step 9 and surface the error in the Warnings section. The Morning Brief and daily hub are already written; a missed snapshot must not block the workflow.
 
 ### Step 9: Report Results
 
 Display a summary followed by the execution report (per `vault-config/references/source-manifest.md`):
 
 ```markdown
-Journal processed for YYYY-MM-DD.
+Morning Brief processed for YYYY-MM-DD.
 
 **Summary**: [2-3 sentence summary]
 **Mood**: [mood]
-**Habits**: N/M completed (list checked items, note missed items)
+**Habits**: Morning Brief complete; list other user-defined fields only when present
 **Daily hub**: v3 plan rendered:
   - Focus: N
   - Review: N
@@ -841,10 +839,10 @@ Journal processed for YYYY-MM-DD.
   - Anchor: N
   - Routing Exceptions: N
 **Todoist**: [created count] tasks created, [initiative count] initiatives, [skip count] skipped, [existing count] already existed
-**Gratitude**: [3 items written to journal / already present / ⚠️ not mentioned — prompt shown]
+**Gratitude**: [only when explicitly present; otherwise omit]
 **People**: [list or "none mentioned"]
 
-Journal entry updated: [[5. Resources/Personal/Journal/Morning Entries/YYYY-MM-DD]]
+Morning Brief updated: [[5. Resources/Personal/Journal/Morning Entries/YYYY-MM-DD]]
 Daily hub updated: [[1. Daily/YYYY-MM-DD]]
 
 ---
@@ -854,7 +852,7 @@ Daily hub updated: [[1. Daily/YYYY-MM-DD]]
 - [x] Obsidian MCP — N sections patched
 - [x] QMD Search — people lookup, N contacts resolved
 - [x] Todoist — N tasks created, M deduped
-- [x] Processing commit — abc1234 `docs: process-journal for YYYY-MM-DD`
+- [x] Processing commit — abc1234 `docs: process-morning for YYYY-MM-DD`
 
 #### Warnings
 - [only if there are actual warnings]
@@ -910,7 +908,7 @@ If a "not acceptable" item appears, trace back:
 
 ### Live-fire test
 
-The first real verification is the user's morning invocation: `/process-journal` on today's transcript. Confirm all 6 lanes render (or are correctly omitted when empty), carry-forward absorbs prior open items, blocker inference asks the right questions on at least one priority, contact re-grounding produces canonical wikilinks, and capability markers appear on bullets matching their `ai_capability` tags. Capture any hand-edits required as a gap note under {Project} and iterate.
+The first real verification is the user's morning invocation: `/process-morning` on today's transcript. Confirm all 6 lanes render (or are correctly omitted when empty), carry-forward absorbs prior open items, blocker inference asks the right questions on at least one priority, contact re-grounding produces canonical wikilinks, and capability markers appear on bullets matching their `ai_capability` tags. Capture any hand-edits required as a gap note under {Project} and iterate.
 
 ## Extraction Guidelines
 
@@ -928,13 +926,13 @@ When analyzing the raw transcript:
 
 | Scenario | Handling |
 |----------|----------|
-| No journal entry for date | Report and stop |
+| No Morning Brief for date | Report and stop |
 | No daily note for date | Report and stop |
 | Already processed (bottom marker line present) | Warn and ask. On confirm: refresh AI Summary and re-classify priorities (preserve task notes already created) |
-| Journal is empty / very short | Extract what you can, note brevity |
+| Optional morning input is empty / very short | Keep the prepared brief useful; extract only what exists |
 | No priorities mentioned | Write "No explicit priorities mentioned" in both locations |
 | No daily-plan candidates extracted | Daily hub renders the v3 section scaffold with empty-state bullets in each lane |
-| No explicit gratitude | Write "⚠️ No gratitude entry today. What are 3 things you're grateful for?" — never fabricate gratitude items |
+| No explicit gratitude | Omit gratitude silently — never fabricate or prompt |
 | No people mentioned | Omit the "People mentioned" line |
 | Evening section present | Only process `## Morning` section (ignore Evening) |
 | Gratitude already in journal | Do not duplicate — keep existing gratitude section |

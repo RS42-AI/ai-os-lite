@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gather deterministic inputs for /process-journal v3 daily planning.
+"""Gather deterministic inputs for /process-morning Morning Brief planning.
 
 This script treats Obsidian frontmatter as the local API. It does not decide the
 day's meaning; it returns queryable candidates for Focus, Review, Decide,

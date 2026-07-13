@@ -88,7 +88,7 @@ Using the file metadata from Step 1, group files into commit batches. Apply thes
 | Same date + same area + multiple projects = one commit | Mar 18 {WorkArea}: {Project} devlog + {Project2} devlog + {Project3} devlog |
 | Same date + different area = separate commits | Mar 18 {WorkArea} work vs. Mar 18 {Project} work |
 | New project scaffold = standalone commit | New project hub + notes + devlogs (even if spanning 2 dates) |
-| Daily hubs + journals + career prep = bundled together | Mar 18 daily hub + morning journal + interview prep |
+| Daily hubs + briefings + career prep = bundled together | Mar 18 daily hub + Morning Brief + interview prep |
 | System/config files = final catchall commit | `.obsidian/` settings + `.claude/` config + Granola sync state |
 | Images/Excalidraw = with their project | project-setup.excalidraw goes with {Project} commit |
 
@@ -132,7 +132,7 @@ Order commits chronologically, oldest first:
 ```
 docs: add Mar 17 {Project} devlog, knowledge notes, and hub updates
 docs: add Mar 18 {WorkArea} work — {Project} architecture pivot, {Project2} meeting, {Project3} outreach
-docs: add Mar 18 daily hub, morning journal, and career prep
+docs: add Mar 18 daily hub, Morning Brief, and career prep
 chore: update daily hubs, journal entries, config, and Granola sync state
 ```
 
