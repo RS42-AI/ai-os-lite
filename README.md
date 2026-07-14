@@ -1,6 +1,6 @@
 # AI-OS Lite
 
-**An AI operating system for focused human-agent work** — a [Claude Code](https://docs.claude.com/en/docs/claude-code) plugin that turns an [Obsidian](https://obsidian.md) vault into an AI-operated daily workflow: executive Morning Briefs, optional free-form input, task orchestration, evening preparation, and project status — all grounded in your own notes.
+**An AI operating system for focused human-agent work** — a plugin for Claude Code and Codex that turns an [Obsidian](https://obsidian.md) vault into an AI-operated daily workflow: executive Morning Briefs, optional free-form input, task orchestration, evening preparation, and project status — all grounded in your own notes.
 
 AI-OS Lite reads and writes your vault, syncs work items to [Todoist](https://todoist.com) and [Linear](https://linear.app), and keeps your daily/project hubs current. It's the engine behind a frontmatter-routed, AI-navigable knowledge system.
 
@@ -8,7 +8,7 @@ AI-OS Lite reads and writes your vault, syncs work items to [Todoist](https://to
 
 ## What it does
 
-Eight skills, invoked by natural language or slash commands:
+Eight skills, invoked by natural language, Claude Code slash commands, or Codex `$skill-name` references:
 
 | Skill | What it does |
 |-------|-------------|
@@ -23,11 +23,13 @@ Eight skills, invoked by natural language or slash commands:
 
 ## Requirements
 
-- [Claude Code](https://docs.claude.com/en/docs/claude-code)
+- [Claude Code](https://docs.claude.com/en/docs/claude-code) or [Codex](https://developers.openai.com/codex/)
 - An Obsidian vault following the AI-OS frontmatter conventions (see `AGENTS.md` in your vault — the plugin reads your vault's structure, taxonomy, and project identity from there)
 - Optional integrations: [Todoist CLI](https://github.com/sachaos/todoist) (`td`), [Linear MCP](https://linear.app/docs/mcp), Obsidian local REST API
 
 ## Install
+
+### Claude Code
 
 ```bash
 # Add this marketplace
@@ -37,9 +39,21 @@ claude plugin marketplace add RS42-AI/ai-os-lite
 claude plugin install ai-os-lite@ai-os-lite-marketplace
 ```
 
+### Codex
+
+```bash
+# Add the public AI-OS Lite marketplace
+codex plugin marketplace add RS42-AI/ai-os-lite
+
+# Install the plugin for this Codex user
+codex plugin add ai-os-lite@ai-os-lite-marketplace
+```
+
+Start a new Codex task after installation so the eight skills are loaded. Open your generated vault as the Codex workspace, then invoke a skill naturally or explicitly—for example, `Run $start-day for today.`
+
 The skills are **manual by default**. Run `/start-day` when you want the Morning Brief prepared. The same commands are safe to invoke from an external scheduler, but AI-OS Lite does not install or configure that scheduler for you.
 
-Then configure your vault path and conventions in your vault's `AGENTS.md`. The plugin substitutes your real areas, projects, contacts, and work-item prefixes from there at runtime — the skill examples ship with generic `{WorkArea}` / `{Project}` / `{Contact}` placeholders that resolve to *your* data.
+Then configure your vault path and conventions in your vault's `AGENTS.md`. The plugin substitutes your real areas, projects, contacts, and work-item prefixes from there at runtime — the skill examples ship with generic `{WorkArea}` / `{Project}` / `{Contact}` placeholders that resolve to *your* data. Plugin installation is user-level; each person still opens and operates only their own vault instance.
 
 ## Configuration
 

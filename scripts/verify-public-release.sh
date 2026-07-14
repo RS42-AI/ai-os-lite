@@ -28,7 +28,7 @@ else
   pass "release history excludes internal implementation plans"
 fi
 
-path_hits="$(git grep -n -E "/Users/|\\\$HOME/RS42" -- plugins README.md .claude-plugin 2>/dev/null || true)"
+path_hits="$(git grep -n -E "/Users/|\\\$HOME/RS42" -- plugins README.md .claude-plugin .agents 2>/dev/null || true)"
 if [[ -n "$path_hits" ]]; then
   printf '%s\n' "$path_hits" >&2
   fail "local machine paths appear in public artifacts"
@@ -43,7 +43,7 @@ if [[ -n "${AI_OS_PRIVATE_PATTERN_FILE:-}" ]]; then
     private_hits=""
     while IFS= read -r pattern; do
       [[ -z "$pattern" || "$pattern" == \#* ]] && continue
-      hits="$(git grep -n -i -F "$pattern" -- plugins README.md .claude-plugin 2>/dev/null \
+      hits="$(git grep -n -i -F "$pattern" -- plugins README.md .claude-plugin .agents 2>/dev/null \
         | grep -v -E '^README\.md:[0-9]+:> Copyright © 2026 Yandi Farinango / RandomStateLabs\.' \
         || true)"
       if [[ -n "$hits" ]]; then
@@ -78,7 +78,7 @@ else
   pass "README marketplace path"
 fi
 
-if git grep -n -E 'scheduled Morning Brief|scheduled executive Morning Brief' -- README.md .claude-plugin >/dev/null 2>&1; then
+if git grep -n -E 'scheduled Morning Brief|scheduled executive Morning Brief' -- README.md .claude-plugin .agents >/dev/null 2>&1; then
   fail "release metadata promises a scheduler that the plugin does not install"
 else
   pass "release metadata describes scheduling accurately"
@@ -89,31 +89,53 @@ import json
 from pathlib import Path
 
 root = Path.cwd()
-marketplace = json.loads((root / ".claude-plugin/marketplace.json").read_text())
-plugin = json.loads((root / "plugins/ai-os-lite/.claude-plugin/plugin.json").read_text())
+claude_marketplace = json.loads((root / ".claude-plugin/marketplace.json").read_text())
+claude_plugin = json.loads((root / "plugins/ai-os-lite/.claude-plugin/plugin.json").read_text())
+codex_marketplace = json.loads((root / ".agents/plugins/marketplace.json").read_text())
+codex_plugin = json.loads((root / "plugins/ai-os-lite/.codex-plugin/plugin.json").read_text())
 
-market_version = marketplace["metadata"]["version"]
-plugin_version = plugin["version"]
-if market_version != plugin_version:
-    raise SystemExit(f"version mismatch: marketplace={market_version}, plugin={plugin_version}")
+versions = {
+    "claude marketplace": claude_marketplace["metadata"]["version"],
+    "claude plugin": claude_plugin["version"],
+    "codex plugin": codex_plugin["version"],
+}
+if len(set(versions.values())) != 1:
+    raise SystemExit(f"version mismatch: {versions}")
+
+if codex_marketplace["name"] != "ai-os-lite-marketplace":
+    raise SystemExit("Codex marketplace name must be ai-os-lite-marketplace")
+entries = [entry for entry in codex_marketplace["plugins"] if entry.get("name") == "ai-os-lite"]
+if len(entries) != 1:
+    raise SystemExit("Codex marketplace must expose exactly one ai-os-lite entry")
+entry = entries[0]
+if entry.get("source") != {"source": "local", "path": "./plugins/ai-os-lite"}:
+    raise SystemExit(f"unexpected Codex marketplace source: {entry.get('source')}")
+if entry.get("policy") != {"installation": "AVAILABLE", "authentication": "ON_INSTALL"}:
+    raise SystemExit(f"unexpected Codex marketplace policy: {entry.get('policy')}")
 
 plugin_root = root / "plugins/ai-os-lite"
-missing = [skill for skill in plugin["skills"] if not (plugin_root / skill).is_dir()]
+if claude_plugin["name"] != codex_plugin["name"] or claude_plugin["name"] != "ai-os-lite":
+    raise SystemExit("Claude/Codex plugin names do not match ai-os-lite")
+missing = [skill for skill in claude_plugin["skills"] if not (plugin_root / skill).is_dir()]
 if missing:
     raise SystemExit(f"registered skill directories missing: {missing}")
 
-listed = {Path(skill).name for skill in plugin["skills"]}
+listed = {Path(skill).name for skill in claude_plugin["skills"]}
 present = {path.name for path in (plugin_root / "skills").iterdir() if path.is_dir()}
 if listed != present:
     raise SystemExit(
         f"manifest/skill-directory mismatch: unregistered={sorted(present-listed)}, "
         f"missing={sorted(listed-present)}"
     )
+
+codex_skill_root = plugin_root / codex_plugin["skills"]
+if codex_plugin["skills"] != "./skills/" or not codex_skill_root.is_dir():
+    raise SystemExit(f"invalid Codex skills path: {codex_plugin['skills']}")
 PY
 then
-  pass "JSON, version, and skill-manifest consistency"
+  pass "Claude/Codex JSON, version, marketplace, and skill consistency"
 else
-  fail "JSON, version, or skill-manifest consistency"
+  fail "Claude/Codex packaging consistency"
 fi
 
 syntax_failures=0

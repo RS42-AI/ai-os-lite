@@ -1,0 +1,39 @@
+{
+  "name": "ai-os-lite",
+  "version": "0.4.1",
+  "description": "AI-OS Lite — share-safe workflows for Morning Briefs, optional reflection, vault management, and project sync in Obsidian.",
+  "author": {
+    "name": "RandomStateLabs",
+    "url": "https://github.com/RS42-AI"
+  },
+  "homepage": "https://github.com/RS42-AI/ai-os-lite",
+  "repository": "https://github.com/RS42-AI/ai-os-lite",
+  "license": "AGPL-3.0-only",
+  "keywords": [
+    "ai-os",
+    "obsidian",
+    "morning-brief",
+    "productivity",
+    "daily-workflow",
+    "vault-management"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AI-OS Lite",
+    "shortDescription": "Daily briefings and vault workflows for Obsidian.",
+    "longDescription": "AI-OS Lite packages eight share-safe workflows for Morning Brief preparation and processing, optional evening reflection, project sync, vault commits, and deterministic vault audits. Each user's vault AGENTS.md remains the source of truth for structure, taxonomy, privacy, and project identity.",
+    "developerName": "RandomStateLabs",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/RS42-AI/ai-os-lite",
+    "defaultPrompt": [
+      "Run $start-day for today.",
+      "Run $process-morning after my Morning Brief.",
+      "Audit my vault with $vault-audit."
+    ],
+    "brandColor": "#3B82F6"
+  }
+}

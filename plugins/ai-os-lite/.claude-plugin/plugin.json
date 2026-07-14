@@ -1,6 +1,6 @@
 {
   "name": "ai-os-lite",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "AI-OS Lite — a generalized AI operating system for Morning Briefs, optional reflection, vault management, and task orchestration on Obsidian + Linear",
   "author": {
     "name": "RandomStateLabs",
