@@ -1,6 +1,6 @@
 {
   "name": "ai-os-lite",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "AI-OS Lite — share-safe workflows for Morning Briefs, optional reflection, vault management, and project sync in Obsidian.",
   "author": {
     "name": "RandomStateLabs",
@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "AI-OS Lite",
     "shortDescription": "Daily briefings and vault workflows for Obsidian.",
-    "longDescription": "AI-OS Lite packages eight share-safe workflows for Morning Brief preparation and processing, optional evening reflection, project sync, vault commits, and deterministic vault audits. Each user's vault AGENTS.md remains the source of truth for structure, taxonomy, privacy, and project identity.",
+    "longDescription": "AI-OS Lite packages nine share-safe workflows for Morning Brief preparation and processing, optional evening reflection, project sync, vault commits, deterministic vault audits, and ontology-linted note writing. Each user's vault AGENTS.md remains the source of truth for structure, taxonomy, privacy, and project identity.",
     "developerName": "RandomStateLabs",
     "category": "Productivity",
     "capabilities": [

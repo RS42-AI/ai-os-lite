@@ -2,7 +2,7 @@
   "name": "ai-os-lite-marketplace",
   "metadata": {
     "description": "AI-OS Lite — Morning Briefs, optional reflection, vault management, and task orchestration for Obsidian + Linear",
-    "version": "0.4.1"
+    "version": "0.5.0"
   },
   "owner": {
     "name": "RS42-AI",

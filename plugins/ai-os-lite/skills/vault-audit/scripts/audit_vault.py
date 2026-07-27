@@ -265,6 +265,7 @@ VALUE_RE = re.compile(r"^[a-z][a-z0-9-]*$")
 AMNESTY_RE = re.compile(r"on/after\s+`(\d{4}-\d{2}-\d{2})`")
 BACKTICK_RE = re.compile(r"`([^`]+)`")
 SEP_CELL_RE = re.compile(r"^:?-{3,}:?$")
+VERB_FIELD_RE = re.compile(r"^[a-z][a-z0-9_]*:$")
 
 
 def _parse_tables(text: str) -> list[list[list[str]]]:
@@ -298,6 +299,7 @@ def load_agents_contract(vault: Path) -> tuple[dict[str, Any] | None, list[str],
       areas:  | Area folder | `area` slug |
       types:  | Value | Description | Where it lives |
       status: | `type` | allowed `status` (progression →) | pause / terminal |
+      verbs:  | Verb | Meaning (A —verb→ B) | Written as |
     """
     f = vault / "AGENTS.md"
     if not f.is_file():
@@ -365,13 +367,30 @@ def load_agents_contract(vault: Path) -> tuple[dict[str, Any] | None, list[str],
         if not status_by_type:
             errors.append("AGENTS.md: status table has no parseable per-type values")
 
+    verb_fields: set[str] = set()
+    rows = rows_for("verb", "written as")
+    if rows is None:
+        warnings.append("AGENTS.md: relationship-verbs table not found "
+                        "(need header '| Verb | … | Written as |') — verb lint disabled")
+    else:
+        for r in rows:
+            if not r:
+                continue
+            if "never a separate field" in " ".join(r).lower():
+                continue  # part_of is expressed by project:/area:, not a field
+            verb_fields.update(v[:-1] for v in BACKTICK_RE.findall(r[-1])
+                               if VERB_FIELD_RE.match(v))
+        if not verb_fields:
+            warnings.append("AGENTS.md: relationship-verbs table found but no verb fields "
+                            "parsed — verb lint disabled")
+
     m = AMNESTY_RE.search(text)
     amnesty = m.group(1) if m else ""
 
     if errors:
         return None, errors, warnings
     return ({"types": types, "status_by_type": status_by_type, "areas": areas,
-             "amnesty_date": amnesty}, [], warnings)
+             "amnesty_date": amnesty, "verb_fields": verb_fields}, [], warnings)
 
 
 # ---------------------------------------------------------------------------

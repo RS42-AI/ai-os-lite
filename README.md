@@ -8,7 +8,7 @@ AI-OS Lite reads and writes your vault, syncs work items to [Todoist](https://to
 
 ## What it does
 
-Eight skills, invoked by natural language, Claude Code slash commands, or Codex `$skill-name` references:
+Nine skills, invoked by natural language, Claude Code slash commands, or Codex `$skill-name` references:
 
 | Skill | What it does |
 |-------|-------------|
@@ -19,6 +19,7 @@ Eight skills, invoked by natural language, Claude Code slash commands, or Codex 
 | `project-sync` | Refreshes a project hub's status from recent devlogs, notes, and Linear |
 | `vault-commit` | Groups uncommitted vault changes into clean semantic git commits |
 | `vault-audit` | Deterministic conformance audit of your vault's structure against its own `AGENTS.md` contract |
+| `write-note` | Writes or edits one vault note to ontology standard — canon-live routing, closed-enum frontmatter, typed links, and a deterministic post-write lint |
 | `vault-config` | Shared operational config — tool patterns, integrations, search strategy (not user-invoked) |
 
 ## Requirements
@@ -49,7 +50,7 @@ codex plugin marketplace add RS42-AI/ai-os-lite
 codex plugin add ai-os-lite@ai-os-lite-marketplace
 ```
 
-Start a new Codex task after installation so the eight skills are loaded. Open your generated vault as the Codex workspace, then invoke a skill naturally or explicitly—for example, `Run $start-day for today.`
+Start a new Codex task after installation so the nine skills are loaded. Open your generated vault as the Codex workspace, then invoke a skill naturally or explicitly—for example, `Run $start-day for today.`
 
 The skills are **manual by default**. Run `/start-day` when you want the Morning Brief prepared. The same commands are safe to invoke from an external scheduler, but AI-OS Lite does not install or configure that scheduler for you.
 
