@@ -1,0 +1,40 @@
+name: Verify public package
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  package:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install test dependencies
+        run: |
+          if [ "${{ runner.os }}" = macOS ]; then
+            brew install bats-core jq shellcheck
+          else
+            sudo apt-get update
+            sudo apt-get install -y bats jq shellcheck
+          fi
+          python3 -m venv /tmp/ai-os-test-python
+          /tmp/ai-os-test-python/bin/pip install PyYAML
+          echo /tmp/ai-os-test-python/bin >> "$GITHUB_PATH"
+      - name: Verify workflows and public package
+        run: bash scripts/verify-public-release.sh
+      - name: Verify setup and migration
+        run: |
+          shellcheck setup/*.sh setup/test/test_helper.bash
+          bats setup/test/
+          python3 -m unittest discover -s setup/test -p '*_test.py'
+  powershell:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse Windows bootstrap
+        shell: pwsh
+        run: |
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile("$pwd/setup/setup-windows.ps1", [ref]$null, [ref]$errors) | Out-Null
+          if ($errors) { $errors | Format-List; exit 1 }
