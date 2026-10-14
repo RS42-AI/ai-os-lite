@@ -65,7 +65,22 @@ fi
 
 # --- 3. Enable it (install != enable; both are needed for the commands to appear) ---
 echo "[3/3] Enabling AI-OS Lite plugin..."
-if ! claude plugin enable "$PLUGIN"; then
+if enable_output="$(claude plugin enable "$PLUGIN" 2>&1)"; then
+  printf '%s\n' "$enable_output"
+elif claude plugin list --json | python3 -c '
+import json, sys
+plugins = json.load(sys.stdin)
+sys.exit(0 if isinstance(plugins, list) and any(
+    isinstance(plugin, dict) and plugin.get("id") == sys.argv[1]
+    and plugin.get("scope") == "user" and plugin.get("enabled") is True
+    for plugin in plugins
+) else 1)
+' "$PLUGIN"; then
+  # Some clients enable on install and return an error when enabled again.
+  # Verify the actual user-scoped state instead of matching an error message.
+  echo "  AI-OS Lite is already enabled (verified in installed plugins)."
+else
+  printf '%s\n' "$enable_output" >&2
   echo "  WARNING: enable failed. Try manually: claude plugin enable $PLUGIN"
   exit 2
 fi
