@@ -1,0 +1,8 @@
+workflow: no-frontmatter-pkg
+description: Fixture isolating a SKILL.md with no frontmatter fence
+version: 1
+steps:
+  - id: open-dashboards
+    role: ai
+    mutation: read
+    action: Open the signed-in Etsy seller dashboard

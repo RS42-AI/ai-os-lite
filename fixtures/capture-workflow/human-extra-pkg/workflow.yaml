@@ -1,0 +1,8 @@
+workflow: human-extra-pkg
+description: Fixture isolating a human step carrying a forbidden field
+version: 1
+steps:
+  - id: judge-edge-cases
+    role: human
+    prompt: Rank or dismiss the unmatched items
+    mutation: read

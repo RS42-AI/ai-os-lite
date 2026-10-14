@@ -1,0 +1,8 @@
+workflow: no-skillmd-pkg
+description: Fixture isolating a missing SKILL.md file
+version: 1
+steps:
+  - id: open-dashboards
+    role: ai
+    mutation: read
+    action: Open the signed-in Etsy seller dashboard

@@ -1,0 +1,8 @@
+workflow: missing-gate-pkg
+description: Fixture isolating a missing gate on a send mutation
+version: 1
+steps:
+  - id: send-replies
+    role: ai
+    mutation: send
+    action: Preview each drafted reply and send only what is approved

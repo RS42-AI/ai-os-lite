@@ -1,0 +1,8 @@
+workflow: coords-pkg
+description: Fixture isolating a coordinate-based action
+version: 1
+steps:
+  - id: open-inbox
+    role: ai
+    mutation: read
+    action: Click at 640, 315 to open the inbox

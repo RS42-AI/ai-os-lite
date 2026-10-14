@@ -1,0 +1,19 @@
+{
+  "contract_version": 2,
+  "canonical_templates": {
+    "area-dashboard": "Area Dashboard Template.md",
+    "daily": "Daily Note Hub Template.md",
+    "devlog": "Devlog Template.md",
+    "goal": "Goal Hub Template.md",
+    "idea": "Idea Template.md",
+    "journal": "Journal Entry Template.md",
+    "meeting": "Meeting Template.md",
+    "note": "Full Note Template.md",
+    "person": "Person Template.md",
+    "project": "Project Hub Template.md",
+    "resource": "Resource Template.md",
+    "spec": "Spec Template.md",
+    "task": "Task Note Template.md",
+    "thought": "Thought Template.md"
+  }
+}

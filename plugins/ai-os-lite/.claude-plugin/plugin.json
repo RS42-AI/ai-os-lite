@@ -1,0 +1,32 @@
+{
+  "name": "ai-os-lite",
+  "version": "0.7.0-rc.5",
+  "description": "AI-OS Lite \u2014 organize your knowledge and put it to work with AI.",
+  "author": {
+    "name": "RandomStateLabs",
+    "url": "https://github.com/RandomStateLabs"
+  },
+  "license": "LicenseRef-AI-OS-Lite-1.0",
+  "keywords": [
+    "ai-os",
+    "obsidian",
+    "morning-brief",
+    "productivity",
+    "briefings",
+    "linear"
+  ],
+  "skills": [
+    "./skills/vault-config",
+    "./skills/setup-context",
+    "./skills/process-morning",
+    "./skills/start-day",
+    "./skills/prep-evening",
+    "./skills/process-evening",
+    "./skills/project-sync",
+    "./skills/vault-commit",
+    "./skills/vault-audit",
+    "./skills/write-note",
+    "./skills/capture-workflow"
+  ],
+  "homepage": "https://rs42.ai/"
+}

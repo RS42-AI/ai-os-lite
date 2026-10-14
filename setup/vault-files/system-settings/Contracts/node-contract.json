@@ -1,0 +1,299 @@
+{
+  "schema_version": 1,
+  "closed_world": true,
+  "approvals": {},
+  "profiles": {
+    "area-dashboard": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "required_fields": [
+        "area",
+        "date",
+        "status",
+        "type"
+      ],
+      "optional_fields": [
+        "tags"
+      ],
+      "conditional_fields": [],
+      "additional_fields": false
+    },
+    "daily": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "required_fields": [
+        "date",
+        "type"
+      ],
+      "optional_fields": [
+        "tags"
+      ],
+      "conditional_fields": [],
+      "additional_fields": false
+    },
+    "devlog": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "required_fields": [
+        "area",
+        "date",
+        "project",
+        "session_topic",
+        "status",
+        "type"
+      ],
+      "optional_fields": [
+        "private",
+        "tags"
+      ],
+      "conditional_fields": [],
+      "additional_fields": false
+    },
+    "goal": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "required_fields": [
+        "area",
+        "date",
+        "horizon",
+        "period",
+        "status",
+        "type"
+      ],
+      "optional_fields": [
+        "tags"
+      ],
+      "conditional_fields": [],
+      "additional_fields": false
+    },
+    "idea": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "required_fields": [
+        "area",
+        "date",
+        "status",
+        "type"
+      ],
+      "optional_fields": [
+        "project",
+        "tags"
+      ],
+      "conditional_fields": [
+        {
+          "field": "private",
+          "effect": "allowed",
+          "when": {
+            "field": "project",
+            "operator": "nonempty"
+          },
+          "otherwise": "omit"
+        }
+      ],
+      "additional_fields": false
+    },
+    "journal": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "required_fields": [
+        "date",
+        "journal_type",
+        "type"
+      ],
+      "optional_fields": [
+        "habit_evening_meditation",
+        "habit_evening_reflection",
+        "habit_gratitude",
+        "habit_journaled",
+        "habit_meditation",
+        "habit_morning_brief",
+        "habit_vitamins",
+        "habit_workout",
+        "tags"
+      ],
+      "conditional_fields": [],
+      "additional_fields": false
+    },
+    "meeting": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "required_fields": [
+        "area",
+        "attendees",
+        "date",
+        "source",
+        "status",
+        "type"
+      ],
+      "optional_fields": [
+        "end",
+        "granola_id",
+        "granola_url",
+        "meeting_link",
+        "private",
+        "project",
+        "start",
+        "tags"
+      ],
+      "conditional_fields": [],
+      "additional_fields": false
+    },
+    "note": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "required_fields": [
+        "area",
+        "date",
+        "status",
+        "type"
+      ],
+      "optional_fields": [
+        "project",
+        "tags"
+      ],
+      "conditional_fields": [
+        {
+          "field": "private",
+          "effect": "allowed",
+          "when": {
+            "field": "project",
+            "operator": "nonempty"
+          },
+          "otherwise": "omit"
+        }
+      ],
+      "additional_fields": false
+    },
+    "person": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "required_fields": [
+        "date",
+        "type"
+      ],
+      "optional_fields": [
+        "area",
+        "organization",
+        "private",
+        "project",
+        "relationship",
+        "role",
+        "tags"
+      ],
+      "conditional_fields": [],
+      "additional_fields": false
+    },
+    "project": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "required_fields": [
+        "area",
+        "date",
+        "project",
+        "status",
+        "type"
+      ],
+      "optional_fields": [
+        "kr",
+        "private",
+        "shared_hub_url",
+        "shared_id",
+        "tags"
+      ],
+      "conditional_fields": [],
+      "additional_fields": false
+    },
+    "resource": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "required_fields": [
+        "area",
+        "date",
+        "type"
+      ],
+      "optional_fields": [
+        "private",
+        "project",
+        "source_url",
+        "tags"
+      ],
+      "conditional_fields": [],
+      "additional_fields": false
+    },
+    "spec": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "required_fields": [
+        "area",
+        "date",
+        "project",
+        "status",
+        "type"
+      ],
+      "optional_fields": [
+        "private",
+        "tags"
+      ],
+      "conditional_fields": [],
+      "additional_fields": false
+    },
+    "task": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "required_fields": [
+        "area",
+        "date",
+        "priority",
+        "status",
+        "type"
+      ],
+      "optional_fields": [
+        "blocked_reason",
+        "done_date",
+        "due_date",
+        "external_id",
+        "project",
+        "scheduled_date",
+        "tags"
+      ],
+      "conditional_fields": [
+        {
+          "field": "private",
+          "effect": "allowed",
+          "when": {
+            "field": "project",
+            "operator": "nonempty"
+          },
+          "otherwise": "omit"
+        }
+      ],
+      "additional_fields": false
+    },
+    "thought": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "required_fields": [
+        "area",
+        "date",
+        "status",
+        "type"
+      ],
+      "optional_fields": [
+        "project",
+        "tags"
+      ],
+      "conditional_fields": [
+        {
+          "field": "private",
+          "effect": "allowed",
+          "when": {
+            "field": "project",
+            "operator": "nonempty"
+          },
+          "otherwise": "omit"
+        }
+      ],
+      "additional_fields": false
+    }
+  }
+}

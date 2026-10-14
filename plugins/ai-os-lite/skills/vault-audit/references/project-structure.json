@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "required_project_containers": [
+    "Tasks",
+    "Notes",
+    "Resources",
+    "Artifacts",
+    "Specs",
+    "Dev Log"
+  ],
+  "business": {
+    "projects_root": "2. Projects",
+    "area_tasks": "2. Projects/{area}/Tasks",
+    "area_resources": "5. Resources/{area}"
+  },
+  "personal": {
+    "area_hub": "Personal/Personal.md",
+    "goals_root": "Personal/1. Goals",
+    "projects_root": "Personal/2. Projects",
+    "area_tasks": "Personal/Tasks",
+    "area_resources": "5. Resources/Personal",
+    "legacy_area_hub": "3. Areas/Personal/Personal.md",
+    "legacy_goals_roots": [
+      "Personal/Goals",
+      "3. Areas/Personal/Goals"
+    ],
+    "legacy_projects_root": "Personal/{project}"
+  },
+  "project_hub_names": [
+    "{project}.md",
+    "PROJECT.md"
+  ]
+}

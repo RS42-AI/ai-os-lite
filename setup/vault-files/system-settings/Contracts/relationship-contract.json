@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "closed_world": true,
+  "approvals": {},
+  "profiles": {
+    "applies_playbook": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "verb": "applies_playbook",
+      "direction": "subject_to_target",
+      "value_shape": "wikilink_list",
+      "domain_types": [
+        "note",
+        "project",
+        "task"
+      ],
+      "range_types": [
+        "note"
+      ],
+      "min_count": 0,
+      "max_count": null,
+      "required_when": null,
+      "instance_scope": null,
+      "effective_date": null
+    },
+    "blocked_by": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "verb": "blocks",
+      "direction": "target_to_subject",
+      "value_shape": "wikilink_list",
+      "domain_types": [
+        "task"
+      ],
+      "range_types": [
+        "task"
+      ],
+      "min_count": 0,
+      "max_count": null,
+      "required_when": null,
+      "instance_scope": null,
+      "effective_date": null
+    },
+    "goal": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "verb": "serves_goal",
+      "direction": "subject_to_target",
+      "value_shape": "wikilink",
+      "domain_types": [
+        "project"
+      ],
+      "range_types": [
+        "goal"
+      ],
+      "min_count": 1,
+      "max_count": 1,
+      "required_when": {
+        "owner_field": "status",
+        "operator": "equals",
+        "value": "active"
+      },
+      "instance_scope": null,
+      "effective_date": null
+    },
+    "informs": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "verb": "informs",
+      "direction": "subject_to_target",
+      "value_shape": "wikilink_list",
+      "domain_types": [
+        "idea",
+        "meeting",
+        "note",
+        "project",
+        "resource",
+        "spec"
+      ],
+      "range_types": [
+        "goal",
+        "idea",
+        "meeting",
+        "note",
+        "project",
+        "resource",
+        "spec",
+        "task"
+      ],
+      "min_count": 0,
+      "max_count": null,
+      "required_when": null,
+      "instance_scope": null,
+      "effective_date": null
+    },
+    "quarter_goal": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "verb": "serves_goal",
+      "direction": "subject_to_target",
+      "value_shape": "wikilink",
+      "domain_types": [
+        "project"
+      ],
+      "range_types": [
+        "goal"
+      ],
+      "min_count": 0,
+      "max_count": 1,
+      "required_when": null,
+      "instance_scope": null,
+      "effective_date": null
+    },
+    "tasks": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "verb": "evidences",
+      "direction": "subject_to_target",
+      "value_shape": "wikilink_list",
+      "domain_types": [
+        "devlog"
+      ],
+      "range_types": [
+        "task"
+      ],
+      "min_count": 1,
+      "max_count": null,
+      "required_when": null,
+      "instance_scope": {
+        "date_field": "date",
+        "on_or_after": "2026-06-01",
+        "undated_applies": true
+      },
+      "effective_date": null
+    },
+    "unlocks": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "verb": "unlocks",
+      "direction": "subject_to_target",
+      "value_shape": "wikilink_list",
+      "domain_types": [
+        "task"
+      ],
+      "range_types": [
+        "task"
+      ],
+      "min_count": 0,
+      "max_count": null,
+      "required_when": null,
+      "instance_scope": null,
+      "effective_date": null
+    },
+    "uses_system": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "verb": "uses_system",
+      "direction": "subject_to_target",
+      "value_shape": "wikilink_list",
+      "domain_types": [
+        "project",
+        "task"
+      ],
+      "range_types": [
+        "note",
+        "project",
+        "resource"
+      ],
+      "min_count": 0,
+      "max_count": null,
+      "required_when": null,
+      "instance_scope": null,
+      "effective_date": null
+    }
+  }
+}

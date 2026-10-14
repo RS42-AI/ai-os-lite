@@ -1,0 +1,8 @@
+workflow: bad-role-pkg
+description: Fixture isolating an invalid role value
+version: 1
+steps:
+  - id: do-thing
+    role: agent
+    mutation: read
+    action: Open the signed-in Etsy seller dashboard
