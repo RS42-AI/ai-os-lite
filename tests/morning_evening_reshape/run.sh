@@ -16,8 +16,15 @@ assert_contains() {
 }
 
 assert_absent() {
-  local label="$1" file="$2" text="$3"
-  if grep -qF "$text" "$file"; then fail "$label"; fi
+  local label="$1" file="$2" text="$3" result
+  if grep -qF "$text" "$file"; then
+    fail "$label"
+  else
+    result=$?
+    if [ "$result" -ne 1 ]; then
+      fail "$label: grep could not complete the scan (exit $result)"
+    fi
+  fi
   pass "$label"
 }
 
@@ -66,12 +73,22 @@ pass "Morning Brief writer stamps completion without touching raw input"
 
 assert_contains "plugin registers process-morning" "$ROOT/plugins/ai-os-lite/.claude-plugin/plugin.json" '"./skills/process-morning"'
 
-if rg -n '/Users/[[:alnum:]_.-]+/|/home/[[:alnum:]_.-]+/|[A-Z]:[\\/]Users[\\/][[:alnum:]_.-]+[\\/]' "$ROOT/plugins/ai-os-lite/skills" >/dev/null; then
-  fail "portability scan found an absolute home path in runtime content"
-fi
-pass "runtime content excludes absolute home paths"
+assert_rg_absent() {
+  local label="$1" result
+  shift
+  if rg -n "$@" >/dev/null; then
+    fail "$label: forbidden content found"
+  else
+    result=$?
+    if [ "$result" -ne 1 ]; then
+      fail "$label: ripgrep could not complete the scan (exit $result)"
+    fi
+  fi
+  pass "$label"
+}
 
-if rg -n 'process-journal' "$ROOT/plugins" "$ROOT/README.md" "$ROOT/.claude-plugin" >/dev/null; then
-  fail "legacy process-journal identifier remains"
-fi
-pass "legacy process-journal identifier removed"
+assert_rg_absent "runtime content excludes absolute home paths" \
+  '/Users/[[:alnum:]_.-]+/|/home/[[:alnum:]_.-]+/|[A-Z]:[\\/]Users[\\/][[:alnum:]_.-]+[\\/]' \
+  "$ROOT/plugins/ai-os-lite/skills"
+assert_rg_absent "legacy process-journal identifier removed" \
+  'process-journal' "$ROOT/plugins" "$ROOT/README.md" "$ROOT/.claude-plugin"

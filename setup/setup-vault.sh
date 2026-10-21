@@ -33,7 +33,10 @@ while [ $# -gt 0 ]; do
     --help|-h) usage; exit 0 ;;
     --update) UPDATE_MODE=1; shift ;;
     --edition)
-      [ $# -ge 2 ] && [ -n "$2" ] && [[ "$2" != --* ]] || { echo "ERROR: --edition requires a value; the supported setup is generalized"; exit 1; }
+      if [ $# -lt 2 ] || [ -z "${2:-}" ] || [[ "${2:-}" == --* ]]; then
+        echo "ERROR: --edition requires a value; the supported setup is generalized"
+        exit 1
+      fi
       EDITION="$2"; shift 2 ;;
     --edition=*) EDITION="${1#*=}"; shift ;;
     --*) echo "ERROR: unknown option $1"; usage; exit 1 ;;

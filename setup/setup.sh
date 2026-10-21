@@ -26,7 +26,10 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --help|-h) usage; exit 0 ;;
     --edition|--agent)
-      [ $# -ge 2 ] && [ -n "$2" ] && [[ "$2" != --* ]] || { echo "ERROR: $1 requires a value"; exit 1; }
+      if [ $# -lt 2 ] || [ -z "${2:-}" ] || [[ "${2:-}" == --* ]]; then
+        echo "ERROR: $1 requires a value"
+        exit 1
+      fi
       if [ "$1" = --edition ]; then EDITION="$2"; else AGENT="$2"; fi
       shift 2 ;;
     --edition=*) EDITION="${1#*=}"; shift ;;
