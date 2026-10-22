@@ -1,4 +1,4 @@
-# AI-OS Lite
+# AI-OS Lite [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/9axRtknSY)
 
 **AI-OS helps you organize your knowledge and put it to work with AI.**
 
@@ -6,7 +6,7 @@ Keep your projects, decisions, sources and useful history in files you own. Give
 
 AI-OS Lite is the public edition, built by [RS42](https://rs42.ai/). This repository includes workspace setup from [Vault Setup Kit](docs/setup.md), starter content, templates and eleven assistant skills.
 
-[Website](https://rs42.ai/) · [Quick start](#quick-start) · [Worked example](docs/first-use.md) · [Documentation](docs/README.md) · [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/9axRtknSY)
+[Website](https://rs42.ai/) · [Quick start](#quick-start) · [Worked example](docs/first-use.md) · [Documentation](docs/README.md)
 
 ## What you can do
 
