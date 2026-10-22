@@ -1,0 +1,5 @@
+workflow: flow-style-pkg
+description: Fixture isolating flow-style YAML in steps
+version: 1
+steps:
+  - {id: x, role: ai, mutation: read, action: open inbox}

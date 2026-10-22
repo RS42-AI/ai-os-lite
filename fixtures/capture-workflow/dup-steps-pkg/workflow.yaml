@@ -1,0 +1,13 @@
+workflow: dup-steps-pkg
+description: Fixture isolating a duplicate top-level steps key
+version: 1
+steps:
+  - id: send-replies
+    role: ai
+    mutation: send
+    action: Preview each drafted reply and send only what is approved
+steps:
+  - id: open-dashboards
+    role: ai
+    mutation: read
+    action: Open the signed-in Etsy seller dashboard

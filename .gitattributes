@@ -1,0 +1,7 @@
+# The same reviewed bytes must be read by Windows and WSL/Linux helpers.
+LICENSE text eol=lf
+**/LICENSE text eol=lf
+**/LICENSE-METADATA.json text eol=lf
+*.sh text eol=lf
+*.py text eol=lf
+*.md text eol=lf

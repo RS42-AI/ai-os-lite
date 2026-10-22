@@ -1,0 +1,40 @@
+{
+  "name": "ai-os-lite",
+  "version": "0.7.0-rc.5",
+  "description": "AI-OS Lite \u2014 organize your knowledge and put it to work with AI.",
+  "author": {
+    "name": "RandomStateLabs",
+    "url": "https://github.com/RS42-AI"
+  },
+  "homepage": "https://rs42.ai/",
+  "repository": "https://github.com/RS42-AI/ai-os-lite",
+  "license": "LicenseRef-AI-OS-Lite-1.0",
+  "keywords": [
+    "ai-os",
+    "obsidian",
+    "morning-brief",
+    "productivity",
+    "daily-workflow",
+    "vault-management"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AI-OS Lite",
+    "shortDescription": "Organize your knowledge and put it to work with AI.",
+    "longDescription": "AI-OS Lite combines a portable Markdown workspace with guided context setup and assistant workflows for briefs, optional evening reflection, repeatable-process capture, project sync, vault commits, audits and note writing. Obsidian and external integrations are optional. Each user's vault AGENTS.md remains the source of truth for structure, taxonomy, privacy and project identity.",
+    "developerName": "RS42",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://rs42.ai/",
+    "defaultPrompt": [
+      "Use $setup-context to connect one outcome to my area, goal, project and next task.",
+      "Run $start-day for today.",
+      "Run $process-morning after my Morning Brief.",
+      "Turn this completed process into a skill with $capture-workflow."
+    ],
+    "brandColor": "#456049"
+  }
+}

@@ -1,0 +1,246 @@
+{
+  "schema_version": 1,
+  "closed_world": true,
+  "presentation_callout_types": [
+    "abstract",
+    "danger",
+    "example",
+    "important",
+    "info",
+    "note",
+    "question",
+    "quote",
+    "success",
+    "tip",
+    "warning"
+  ],
+  "approvals": {},
+  "profiles": {
+    "area-dashboard": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "closed_structural_tokens": true,
+      "anchors": [
+        {
+          "label": "Visual cockpit",
+          "min_count": 1,
+          "max_count": 1,
+          "value_shape": "any",
+          "projection_of": null,
+          "target_type": null,
+          "required_when": null
+        },
+        {
+          "label": "Standard to Maintain",
+          "min_count": 1,
+          "max_count": 1,
+          "value_shape": "text",
+          "projection_of": null,
+          "target_type": null,
+          "required_when": null
+        }
+      ],
+      "callout_types": []
+    },
+    "daily": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "closed_structural_tokens": true,
+      "anchors": [
+        {
+          "label": "Today cockpit",
+          "min_count": 1,
+          "max_count": 1,
+          "value_shape": "wikilink",
+          "projection_of": null,
+          "target_type": null,
+          "required_when": null
+        }
+      ],
+      "callout_types": []
+    },
+    "devlog": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "closed_structural_tokens": true,
+      "anchors": [
+        {
+          "label": "Project",
+          "min_count": 1,
+          "max_count": 1,
+          "value_shape": "wikilink",
+          "projection_of": "project",
+          "target_type": "project",
+          "required_when": null
+        },
+        {
+          "label": "Previous",
+          "min_count": 0,
+          "max_count": 1,
+          "value_shape": "wikilink",
+          "projection_of": null,
+          "target_type": "devlog",
+          "required_when": null
+        },
+        {
+          "label": "Next",
+          "min_count": 0,
+          "max_count": 1,
+          "value_shape": "wikilink",
+          "projection_of": null,
+          "target_type": "devlog",
+          "required_when": null
+        }
+      ],
+      "callout_types": []
+    },
+    "goal": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "closed_structural_tokens": true,
+      "anchors": [
+        {
+          "label": "Area",
+          "min_count": 1,
+          "max_count": 1,
+          "value_shape": "wikilink",
+          "projection_of": "area",
+          "target_type": "area-dashboard",
+          "required_when": null
+        },
+        {
+          "label": "Sibling goals",
+          "min_count": 0,
+          "max_count": 1,
+          "value_shape": "wikilink",
+          "projection_of": null,
+          "target_type": "goal",
+          "required_when": null
+        },
+        {
+          "label": "Hierarchy",
+          "min_count": 0,
+          "max_count": 1,
+          "value_shape": "any",
+          "projection_of": null,
+          "target_type": null,
+          "required_when": null
+        }
+      ],
+      "callout_types": []
+    },
+    "idea": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "closed_structural_tokens": true,
+      "anchors": [],
+      "callout_types": []
+    },
+    "journal": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "closed_structural_tokens": true,
+      "anchors": [],
+      "callout_types": []
+    },
+    "meeting": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "closed_structural_tokens": true,
+      "anchors": [],
+      "callout_types": []
+    },
+    "note": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "closed_structural_tokens": true,
+      "anchors": [
+        {
+          "label": "Parent",
+          "min_count": 0,
+          "max_count": 1,
+          "value_shape": "wikilink",
+          "projection_of": null,
+          "target_type": null,
+          "required_when": null
+        }
+      ],
+      "callout_types": []
+    },
+    "person": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "closed_structural_tokens": true,
+      "anchors": [],
+      "callout_types": []
+    },
+    "project": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "closed_structural_tokens": true,
+      "anchors": [
+        {
+          "label": "Visual cockpit",
+          "min_count": 1,
+          "max_count": 1,
+          "value_shape": "any",
+          "projection_of": null,
+          "target_type": null,
+          "required_when": null
+        }
+      ],
+      "callout_types": []
+    },
+    "resource": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "closed_structural_tokens": true,
+      "anchors": [
+        {
+          "label": "Parent",
+          "min_count": 0,
+          "max_count": 1,
+          "value_shape": "wikilink",
+          "projection_of": null,
+          "target_type": null,
+          "required_when": null
+        }
+      ],
+      "callout_types": []
+    },
+    "spec": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "closed_structural_tokens": true,
+      "anchors": [],
+      "callout_types": []
+    },
+    "task": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "closed_structural_tokens": true,
+      "anchors": [
+        {
+          "label": "Project",
+          "min_count": 1,
+          "max_count": 1,
+          "value_shape": "wikilink",
+          "projection_of": "project",
+          "target_type": "project",
+          "required_when": {
+            "frontmatter_field": "project",
+            "operator": "nonempty"
+          }
+        }
+      ],
+      "callout_types": []
+    },
+    "thought": {
+      "state": "candidate",
+      "enforcement_scope": "writer_only",
+      "closed_structural_tokens": true,
+      "anchors": [],
+      "callout_types": []
+    }
+  }
+}

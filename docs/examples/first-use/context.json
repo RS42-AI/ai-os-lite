@@ -1,0 +1,135 @@
+{
+  "dates": {
+    "today": "2026-10-12",
+    "today_day": "Monday",
+    "yesterday": "2026-10-11",
+    "yesterday_day": "Sunday"
+  },
+  "files": {
+    "journal_path": "5. Resources/Personal/Journal/Morning Entries/2026-10-12.md",
+    "journal_exists": true,
+    "journal_has_context": false,
+    "daily_hub_path": "1. Daily/2026-10-12.md",
+    "daily_hub_exists": true,
+    "yesterday_hub_path": "1. Daily/2026-10-11.md"
+  },
+  "recap_window": {
+    "from": "2026-10-12",
+    "to": "2026-10-12",
+    "beyond_lookback": true,
+    "days_empty": [],
+    "days": []
+  },
+  "todoist": {
+    "available": false,
+    "skipped": true,
+    "reason": "local-only mode",
+    "tasks": [],
+    "overdue_count": 0,
+    "today_count": 0
+  },
+  "workitems": {
+    "available": false,
+    "reason": "not configured for this install",
+    "work_items": []
+  },
+  "evening": {
+    "found": false,
+    "date": null,
+    "source": null,
+    "content": null,
+    "path": null,
+    "reason": "no evening entry recorded"
+  },
+  "meetings_today": {
+    "available": true,
+    "meetings": [],
+    "count": 0,
+    "prep_count": 0
+  },
+  "task_notes": {
+    "available": true,
+    "source": "filesystem",
+    "tasks": [
+      {
+        "path": "Personal/2. Projects/Vault-Setup/Tasks/Add my first project.md",
+        "status": "todo",
+        "priority": "p2",
+        "due_date": "",
+        "area": "personal",
+        "project": "vault-setup",
+        "blocked_reason": "",
+        "tags": [
+          "task",
+          "onboarding"
+        ],
+        "blocked_by": []
+      },
+      {
+        "path": "Personal/2. Projects/Vault-Setup/Tasks/Set up my AGENTS.md",
+        "status": "todo",
+        "priority": "p3",
+        "due_date": "",
+        "area": "personal",
+        "project": "vault-setup",
+        "blocked_reason": "Best done after you have one real area + project in mind — gives the AI concrete answers to interview you about",
+        "tags": [
+          "task",
+          "onboarding"
+        ],
+        "blocked_by": [
+          "[[Set up my first goal]]"
+        ]
+      },
+      {
+        "path": "Personal/2. Projects/Vault-Setup/Tasks/Set up my first goal.md",
+        "status": "todo",
+        "priority": "p3",
+        "due_date": "",
+        "area": "personal",
+        "project": "vault-setup",
+        "blocked_reason": "Best done after you have one real project to anchor the goal to",
+        "tags": [
+          "task",
+          "onboarding"
+        ],
+        "blocked_by": [
+          "[[Add my first project]]"
+        ]
+      }
+    ],
+    "count": 3,
+    "todo_count": 3,
+    "active_count": 0,
+    "on_hold_count": 0,
+    "errors": []
+  },
+  "commits": {
+    "available": false,
+    "error": "not a git repo or no commits",
+    "commits": []
+  },
+  "active_projects": [],
+  "hot": [],
+  "warm": [],
+  "cold": [],
+  "areas": [
+    {
+      "slug": "personal",
+      "display": "Personal",
+      "rank": 1
+    }
+  ],
+  "source_manifest": {
+    "recap_window": "beyond lookback: no captured work in last 7 days",
+    "todoist": "skipped: local-only mode",
+    "workitems": "skipped: not configured for this install",
+    "evening": "not found",
+    "meetings": "success: 0 meeting note(s), 0 prep note(s)",
+    "task_notes": "success: 3 found (3 todo, 0 active, 0 on-hold)",
+    "project_recency": "success: 0 warm, 0 cold, 0 hot (suppressed)",
+    "areas": "success: 1 area(s) parsed from AGENTS.md",
+    "linear": "skipped: local-only mode",
+    "calendar": "skipped: local-only mode"
+  }
+}

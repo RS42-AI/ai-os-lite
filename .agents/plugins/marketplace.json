@@ -1,0 +1,20 @@
+{
+  "name": "ai-os-lite-marketplace",
+  "interface": {
+    "displayName": "AI-OS Lite"
+  },
+  "plugins": [
+    {
+      "name": "ai-os-lite",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ai-os-lite"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

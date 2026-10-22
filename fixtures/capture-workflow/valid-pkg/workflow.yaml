@@ -1,0 +1,20 @@
+workflow: valid-pkg
+description: Fixture morning queue used by capture_workflow tests
+version: 1
+steps:
+  - id: open-dashboards
+    role: ai
+    mutation: read
+    action: Open the signed-in Etsy seller dashboard
+  - id: judge-edge-cases
+    role: human
+    prompt: Rank or dismiss the unmatched items
+  - id: build-queue
+    role: ai
+    mutation: draft
+    action: Produce the daily action queue with source links
+  - id: send-replies
+    role: ai
+    mutation: send
+    gate: approval
+    action: Preview each drafted reply and send only what is approved

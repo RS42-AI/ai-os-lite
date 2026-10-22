@@ -1,0 +1,231 @@
+AI-OS Lite License 1.0
+
+Licensor: RandomState42 Labs LLC, a Wyoming limited liability company,
+operating as RS42 AI ("RS42").
+
+1. What these terms cover
+
+"Product" means the AI-OS Lite scripts, assistant skills, instructions,
+templates, starter content and documentation that RS42 supplies with these
+terms, including the bundled setup component. Separately identified
+third-party material remains under its own terms.
+
+The Product is licensed, not sold. Before accepting, you may download and
+retain a copy solely to read these terms and assess whether to accept them;
+that limited permission does not authorize other restricted activities.
+
+"You" means the person accepting these terms or the organization that person
+is authorized to represent. "Own use" means managing your personal life, work
+or business, or an organization's own internal operations. "Product files"
+includes copies and modified versions of the Product, but not Your Content
+as described in section 5.
+
+2. Agreement and authority
+
+Read these terms before accepting. The person accepting must affirm agreement
+and enter their own name. A person accepting for an organization must identify
+it and confirm authority to bind it. If you accept for an organization, that
+organization is You. Otherwise, you personally are You. Personal acceptance
+does not bind your employer or another organization. An assistant may display
+the terms and record the person's explicit answer; it may not decide or accept
+for them.
+
+The installer or guided setup saves the accepted text, its version and hash,
+the acceptance date, the person's entered name and the capacity in which they
+accepted in the selected workspace. This record stays on that machine; the
+acceptance feature sends nothing to RS42. The user controls any backup or
+sync of their workspace. Acceptance does not enroll you in a paid service.
+
+The license grants below are subject to these terms. Restrictions on copying,
+modification and distribution limit the scope of the copyright license;
+other promises operate as contractual obligations to the extent enforceable.
+
+3. Free personal and internal business use
+
+RS42 grants you a worldwide, nonexclusive, royalty-free license to download,
+copy, install, run, study and modify the Product for your Own Use. You may
+keep copies on your devices, private repositories, backup storage and servers
+you own or rent, and may run the Product internally for your organization.
+
+An organization may make internal copies available to its employees and
+officers for that organization's work. Salary paid to an employee for this
+internal work is not a prohibited paid service. Each separate organization
+may accept this same free license for its own internal operations.
+
+You may use the Product to carry out paid work in your profession or business
+and deliver Your Content to customers. You may obtain ordinary computing,
+storage, backup and AI-assistant services for your Own Use. Paying for those
+general services does not itself require RS42's permission. Hiring someone
+specifically to install, customize or operate AI-OS for you is covered by
+section 4.
+
+Unpaid help with your permitted use is allowed if the helper accesses only
+the copies needed to help you and does not retain or redistribute them for
+another purpose. The helper receives no right to offer prohibited services.
+
+4. Uses requiring separate written permission
+
+Unless RS42 gives you written permission covering the activity, you may not:
+
+* distribute or re-upload Product files, including modified copies, to other
+  people, repositories, websites, stores, course packs or delivery channels,
+  except for the copying and access expressly allowed elsewhere in these
+  terms, including internal use, unpaid help, assistant operation and GitHub;
+* sell, sublicense or offer copies of the Product, alone or in a bundle;
+* host or operate the Product for people outside your organization, or offer
+  Product access as a hosted or managed service, whether paid or free;
+* provide Product-specific installation, configuration, customization,
+  support, maintenance or training to others in exchange for payment or
+  other compensation, including as part of a larger paid package; or
+* use Product files for the AI activities prohibited in section 7.
+
+Ordinary internal use, general paid professional work and delivery of Your
+Content remain permitted under sections 3 and 5. RS42's permission may specify
+fees, scope, duration and credit, including "Built on AI-OS by RS42" linked
+to https://rs42.ai/. No such extra permission is implied by this license.
+
+5. Your content and independence
+
+Your original notes, data, records and other content remain yours. RS42 takes
+no ownership of them under these terms. You may use, export, share, publish
+and sell them, including completed notes or outputs that follow Product
+folders, headings, metadata and templates. RS42 permits the incidental
+template wording needed to share those completed records.
+
+This permission does not authorize repackaging the Product, its unfilled
+template collection, skills or substantial Product text as Your Content.
+Rights in someone else's material remain theirs. These terms neither promise
+copyright protection for AI-generated output nor take ownership of it.
+
+You may keep and read Your Content after you stop using the Product or any
+RS42 service. RS42 receives no right to delete it or remotely disable your
+local files. Ending a paid service does not end this free license while you
+comply with its terms.
+
+6. Sharing, GitHub and contributions
+
+You may discuss, review and demonstrate the Product, share screenshots and
+reasonable excerpts for those purposes, and link to its official source.
+Free demonstrations are allowed; distribution of Product files and paid
+Product-specific training remain subject to section 4. No endorsement is
+implied by referring to the Product by name.
+
+If RS42 publishes the Product in a public GitHub repository, viewing and
+forking through GitHub's service are allowed as provided by GitHub's terms.
+Keep the license and notices with those copies. This exception does not
+authorize selling the Product, external redistribution or managed services.
+These terms do not withdraw separate permissions RS42 has granted directly
+to a hosting provider; publishing on a platform can involve such permissions.
+
+Bug reports and suggestions are welcome. Do not submit original code or
+substantial authored text for inclusion until RS42 provides and completes
+a separate contributor agreement. This license does not assign your work
+to RS42 or establish a contribution agreement.
+
+7. AI assistants, training and replication
+
+You may provide Product files to an AI assistant to install, explain, operate,
+debug, assess compatibility with or customize the Product for your permitted
+Own Use. This includes retrieval indexes and context supplied to carry out
+those tasks; it is not a grant to train a model on Product files. You may use
+different assistants and test which works for your permitted tasks.
+
+Without RS42's written permission, you may not use Product files, in whole
+or part, to train or fine-tune an AI or machine-learning model, include them
+in a training dataset, or use them as a model-development benchmark or
+evaluation dataset. You may not provide Product files to an AI system to
+produce a reproduction or substitute for distribution or provision to others.
+Private customization allowed by section 3 remains permitted.
+
+Do not intentionally authorize your assistant provider to use Product files
+for its own model training; use available settings that prevent that use.
+You do not guarantee a provider's undisclosed or unauthorized conduct.
+
+RS42 expressly reserves text-and-data-mining rights in Product files,
+including under Article 4(3) of Directive (EU) 2019/790 where applicable,
+subject to the express permissions in these terms and rights the law does
+not allow RS42 to exclude. Independent development without using Product
+files, and the use of unprotected ideas as such, are not prohibited here.
+
+8. Continuity and changes
+
+Your license for a version you receive continues for the duration of RS42's
+applicable rights while you comply with these terms, subject to section 12.
+RS42 cannot change the terms for that copy merely by posting a later license.
+New releases may carry different terms that you may accept or decline.
+No updates, hosting, support or future features are promised by this license.
+
+9. Notices, names and logos
+
+Keep applicable copyright, license and attribution notices in Product copies
+and modified Product files. This does not require adding RS42 branding to
+Your Content. These terms grant no trademark license to the RS42, RS42 AI,
+AI-OS or AI-OS Lite names or logos. Do not imply RS42 endorsement or pass off
+a modified version as an official release. References allowed by law remain
+unaffected.
+
+10. Patent license and patent defense
+
+For uses permitted here, RS42 grants a nonexclusive, royalty-free patent
+license covering claims RS42 can license that would necessarily be infringed
+by using the Product as supplied. This does not represent that RS42 owns any
+patent or grant rights in other products or combinations.
+
+If you bring a written claim that the Product infringes a patent, the patent
+license granted to you here ends immediately. If your organization brings
+that claim, this patent license ends for work on its behalf. This consequence
+is separate from the cure procedure in section 12.
+
+11. Earlier releases and separate rights
+
+These terms apply to the release supplied under them. They do not revoke or
+restrict rights already granted under the GNU AGPL or another license,
+including rights to make and redistribute compliant copies of those earlier
+versions. Deleting or replacing a repository does not alter those grants.
+This release grants no rights in RS42's separately offered full product.
+
+12. Violations and opportunity to cure
+
+If you breach these terms, your licenses under them terminate automatically.
+The first time RS42 gives you written notice of a violation, they are
+automatically reinstated if, within 32 days after receiving that notice, you
+come into full compliance and take practical steps to correct past
+violations. Later violations require RS42's written reinstatement. This cure
+opportunity does not authorize prohibited conduct while it continues and
+does not apply to the patent-defense event in section 10. Termination does
+not transfer Your Content to RS42 or require you to destroy Your Content.
+
+After termination, stop using and distributing Product copies under this
+license and remove them, except a nonoperational copy required by law or
+reasonably needed to preserve evidence. Independent rights under section 11
+and non-excludable rights under section 13 remain unaffected. Resolving a
+violation does not erase liability for conduct already completed.
+
+13. Legal rights, third parties and no other grants
+
+Nothing here excludes fair use, mandatory interoperability rights or other
+rights or protections that applicable law does not permit these terms to
+limit. Third-party components and services have their own licenses and terms;
+RS42 cannot grant or take away their owners' rights. No rights are implied
+beyond the express grants in these terms. You may not transfer or sublicense
+this license; another user may obtain their own license from RS42.
+
+14. Warranty and liability
+
+To the extent permitted by applicable law, the Product is provided "as is"
+and "as available," without warranties of any kind, including merchantability,
+fitness for a particular purpose and noninfringement. RS42 does not promise
+uninterrupted operation, error-free output or compatibility with every tool.
+
+To the extent permitted by applicable law, RS42 is not liable for damages
+arising from these terms or use of the Product, under any legal theory.
+Nothing excludes liability or consumer remedies that cannot lawfully be
+excluded. You remain responsible for reviewing assistant actions and output.
+
+15. Separate permissions and notices to RS42
+
+Additional permission must identify the permitted activity and be issued in
+writing by an authorized representative of RandomState42 Labs LLC. A public
+comment, star, silence or acceptance record does not supply extra permission.
+Send permission requests and notices under these terms to ceo@rs42.ai.
+The reference website is https://rs42.ai/.

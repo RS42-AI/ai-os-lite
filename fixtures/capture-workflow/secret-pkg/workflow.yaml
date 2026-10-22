@@ -1,0 +1,8 @@
+workflow: secret-pkg
+description: Fixture isolating an embedded secret in SKILL.md
+version: 1
+steps:
+  - id: open-dashboards
+    role: ai
+    mutation: read
+    action: Open the signed-in Etsy seller dashboard
