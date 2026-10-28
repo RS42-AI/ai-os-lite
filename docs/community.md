@@ -4,7 +4,7 @@ AI-OS Lite is built by [RS42](https://rs42.ai/). The current website destination
 
 ## Public Discord entry
 
-[Join the RS42 Discord](https://discord.gg/9axRtknSY) and begin in `#📌-start-here`. Use `#ai-os-help` for setup questions and feedback, `#general` for conversation, and `#ai-news` for updates and discussion. AI-OS Lite uses the existing RS42 community.
+[Join the RS42 Discord](https://discord.gg/NYTKfFzpCN) and begin in `#📌-start-here`. Use `#ai-os-help` for setup questions and feedback, `#general` for conversation, and `#ai-news` for updates and discussion. AI-OS Lite uses the existing RS42 community.
 
 Keep shared examples small and remove credentials, personal information and private work before posting.
 
