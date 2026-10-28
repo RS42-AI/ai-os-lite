@@ -1,4 +1,4 @@
-# AI-OS Lite [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/9axRtknSY)
+# AI-OS Lite [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/NYTKfFzpCN)
 
 **AI-OS helps you organize your knowledge and put it to work with AI.**
 
